@@ -1,0 +1,17 @@
+export default defineAppConfig({
+  pages: [
+    'pages/index/index',
+    'pages/webview/index',
+    'pages/home/index'
+  ],
+  window: {
+    backgroundTextStyle: 'light',
+    navigationBarBackgroundColor: '#ffffff',
+    navigationBarTitleText: 'eco-viz',
+    navigationBarTextStyle: 'black'
+  },
+  style: 'v2',
+  lazyCodeLoading: 'requiredComponents'
+});
+
+
