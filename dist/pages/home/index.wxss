@@ -16,39 +16,135 @@
 }
 
 .header {
-  background-color: #ffffff;
-  padding: 20rpx;
-  border-bottom: 1rpx solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 20rpx 16rpx;
+  border-bottom: 1rpx solid #eee;
 }
 
 .title {
-  font-size: 20rpx;
+  font-size: 18rpx;
   font-weight: bold;
-  color: #333;
+  color: #2c2c2c;
+}
+
+.logout {
+  color: #999;
+  font-size: 14rpx;
+  margin-left: 12rpx;
+}
+
+.group-tabs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #fff;
+  padding: 0 8rpx;
+  overflow-x: auto;
+  border-bottom: 1rpx solid #ebebeb;
+  height: 44rpx;
+  white-space: nowrap;
+}
+
+.tab-item {
+  padding: 6rpx 18rpx;
+  font-size: 15rpx;
+  color: #888;
+  border-radius: 20rpx;
+  margin: 0 6rpx;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.tab-item.active {
+  color: #1B9AEE;
+  background: #e4f2fb;
+  font-weight: bold;
 }
 
 .content {
-  padding: 20rpx;
+  min-height: 420rpx;
+  padding: 0 0 60rpx 0;
 }
 
-.user-info {
-  background-color: #ffffff;
-  padding: 15rpx;
-  border-radius: 8rpx;
-  margin-bottom: 20rpx;
+.device-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 9rpx;
+  margin: 12rpx 16rpx 0 16rpx;
+  box-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.0666666667);
+  height: 62rpx;
+  padding: 0 16rpx;
+  position: relative;
 }
 
-.user-info text {
+.left {
+  width: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #ccc;
+  margin-right: 8rpx;
+}
+
+.dot.on {
+  background: #50c948;
+}
+
+.dot.off {
+  background: #bbb;
+}
+
+.middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.name {
   font-size: 16rpx;
-  color: #333;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #282828;
 }
 
-.placeholder {
+.sub {
+  font-size: 13rpx;
+  color: #aaa;
+  margin-top: 2rpx;
+}
+
+.right {
+  min-width: 16rpx;
+  text-align: right;
+}
+
+.arrow {
+  font-size: 22rpx;
+  color: #c7c7c7;
+  margin-left: 6rpx;
+}
+
+.empty {
   text-align: center;
-  padding: 40rpx 20rpx;
+  color: #bbb;
+  margin: 48rpx 0 0 0;
+  font-size: 16rpx;
 }
 
-.placeholder text {
-  font-size: 14rpx;
-  color: #999;
+.footer-tip {
+  text-align: center;
+  font-size: 13rpx;
+  color: #a9a9a9;
+  margin: 20rpx 0 12rpx 0;
 }

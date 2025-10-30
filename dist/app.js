@@ -70,7 +70,7 @@ function App(props) {
 
 
 
-var config = {"pages":["pages/index/index","pages/webview/index","pages/home/index"],"window":{"backgroundTextStyle":"light","navigationBarBackgroundColor":"#ffffff","navigationBarTitleText":"eco-viz","navigationBarTextStyle":"black"},"style":"v2","lazyCodeLoading":"requiredComponents"};
+var config = {"pages":["pages/home/index","pages/webview/index","pages/index/index"],"window":{"backgroundTextStyle":"light","navigationBarBackgroundColor":"#ffffff","navigationBarTitleText":"eco-viz","navigationBarTextStyle":"black"},"style":"v2","lazyCodeLoading":"requiredComponents"};
 _tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__.window.__taroAppConfig = config
 var inst = App((0,_tarojs_plugin_framework_react_dist_runtime__WEBPACK_IMPORTED_MODULE_2__.createReactApp)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_app_app_tsx__WEBPACK_IMPORTED_MODULE_4__["default"], react__WEBPACK_IMPORTED_MODULE_5__, (react_dom__WEBPACK_IMPORTED_MODULE_6___default()), config))
 
@@ -83,23 +83,12 @@ var inst = App((0,_tarojs_plugin_framework_react_dist_runtime__WEBPACK_IMPORTED_
 })
 
 
-/***/ }),
-
-/***/ "./node_modules/taro-ui/dist/style/index.scss":
-/*!****************************************************!*\
-  !*** ./node_modules/taro-ui/dist/style/index.scss ***!
-  \****************************************************/
-/***/ (function() {
-
-// extracted by mini-css-extract-plugin
-
-
 /***/ })
 
 },
 /******/ function(__webpack_require__) { // webpackRuntimeModules
 /******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
-/******/ __webpack_require__.O(0, ["common"], function() { return __webpack_exec__("./src/app.tsx"); });
+/******/ __webpack_require__.O(0, ["vendors","common"], function() { return __webpack_exec__("./src/app.tsx"); });
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);;;

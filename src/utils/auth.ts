@@ -87,8 +87,14 @@ export const navigateToWebViewLoginSimple = async () => {
       const encodedUrl = encodeURIComponent(pkceData.loginUrl)
       const encodedCodeVerifier = encodeURIComponent(pkceData.codeVerifier)
       
+      // 加强 debug 日志和报错显示
       Taro.navigateTo({
-        url: `/pages/webview/index?url=${encodedUrl}&code_verifier=${encodedCodeVerifier}`
+        url: `/pages/webview/index?url=${encodedUrl}&code_verifier=${encodedCodeVerifier}`,
+        success: () => console.log('WebView 登录页面跳转成功'),
+        fail: (err) => {
+          console.error('WebView 登录页面跳转失败', err)
+          Taro.showToast({ title: '跳转登录页失败', icon: 'none' })
+        }
       })
     } else {
       throw new Error(response.data.message || 'PKCE参数生成失败')

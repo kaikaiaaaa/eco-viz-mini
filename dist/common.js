@@ -40,10 +40,10 @@ var config = {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkLoginStatus": function() { return /* binding */ checkLoginStatus; },
 /* harmony export */   "clearLoginData": function() { return /* binding */ clearLoginData; },
+/* harmony export */   "getAuthHeaders": function() { return /* binding */ getAuthHeaders; },
 /* harmony export */   "handleLoginSuccess": function() { return /* binding */ handleLoginSuccess; },
 /* harmony export */   "navigateToWebViewLoginSimple": function() { return /* binding */ navigateToWebViewLoginSimple; }
 /* harmony export */ });
-/* unused harmony export getAuthHeaders */
 /* harmony import */ var _Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/regenerator.js */ "./node_modules/@babel/runtime/helpers/esm/regenerator.js");
 /* harmony import */ var _Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_toConsumableArray_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
 /* harmony import */ var _Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
@@ -162,9 +162,19 @@ var navigateToWebViewLoginSimple = /*#__PURE__*/function () {
 
           // 跳转到WebView页面
           encodedUrl = encodeURIComponent(pkceData.loginUrl);
-          encodedCodeVerifier = encodeURIComponent(pkceData.codeVerifier);
+          encodedCodeVerifier = encodeURIComponent(pkceData.codeVerifier); // 加强 debug 日志和报错显示
           _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().navigateTo({
-            url: "/pages/webview/index?url=".concat(encodedUrl, "&code_verifier=").concat(encodedCodeVerifier)
+            url: "/pages/webview/index?url=".concat(encodedUrl, "&code_verifier=").concat(encodedCodeVerifier),
+            success: function success() {
+              return console.log('WebView 登录页面跳转成功');
+            },
+            fail: function fail(err) {
+              console.error('WebView 登录页面跳转失败', err);
+              _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().showToast({
+                title: '跳转登录页失败',
+                icon: 'none'
+              });
+            }
           });
           _context2.n = 3;
           break;

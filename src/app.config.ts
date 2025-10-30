@@ -1,14 +1,27 @@
 export default defineAppConfig({
   pages: [
-    'pages/index/index',
+    'pages/home/index',
+    'pages/message/index',
+    'pages/profile/index',
     'pages/webview/index',
-    'pages/home/index'
+    'pages/index/index'
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#ffffff',
     navigationBarTitleText: 'eco-viz',
     navigationBarTextStyle: 'black'
+  },
+  tabBar: {
+    color: '#888',
+    selectedColor: '#1B9AEE',
+    backgroundColor: '#fff',
+    borderStyle: 'black',
+    list: [
+      { pagePath: 'pages/home/index', text: '首页' },
+      { pagePath: 'pages/message/index', text: '消息' },
+      { pagePath: 'pages/profile/index', text: '我的' }
+    ]
   },
   style: 'v2',
   lazyCodeLoading: 'requiredComponents'
