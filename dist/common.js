@@ -194,7 +194,7 @@ var navigateToWebViewLoginSimple = /*#__PURE__*/function () {
 // 登录成功后处理（服务端代理模式）
 var handleLoginSuccess = /*#__PURE__*/function () {
   var _ref3 = (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_2__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_3__["default"])().m(function _callee3(tempToken) {
-    var decoded, accessToken, expiresIn, meResp, userData, userInfo, errorMsg, _t3, _t4;
+    var safeBase64UrlDecodeToString, decodedStr, decoded, accessToken, expiresIn, meResp, userData, userInfo, errorMsg, _t3, _t4;
     return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_3__["default"])().w(function (_context3) {
       while (1) switch (_context3.p = _context3.n) {
         case 0:
@@ -202,8 +202,61 @@ var handleLoginSuccess = /*#__PURE__*/function () {
           console.log('🔄 处理临时 token（本地解析）...');
           console.log('Temp token length:', tempToken ? tempToken.length : 0);
 
-          // tempToken 为 base64(JSON.stringify({ access_token, expires_in, timestamp }))
-          decoded = JSON.parse(decodeURIComponent(escape(atob(tempToken))));
+          // ========== 小程序安全的 Base64URL 解码 ==========
+          safeBase64UrlDecodeToString = function safeBase64UrlDecodeToString(input) {
+            // 将 Base64URL 转为标准 Base64，并补齐 '='
+            var base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+            var padLen = (4 - base64.length % 4) % 4;
+            var padded = base64 + '='.repeat(padLen);
+            var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+            var rev = {};
+            for (var i = 0; i < alphabet.length; i++) rev[alphabet[i]] = i;
+            var bytes = [];
+            var buffer = 0;
+            var bits = 0;
+            for (var _i = 0; _i < padded.length; _i++) {
+              var c = padded[_i];
+              if (c === '=') break;
+              var val = rev[c];
+              if (val === undefined) continue;
+              buffer = buffer << 6 | val;
+              bits += 6;
+              if (bits >= 8) {
+                bits -= 8;
+                var byte = buffer >> bits & 0xff;
+                bytes.push(byte);
+                buffer = buffer & (1 << bits) - 1;
+              }
+            }
+
+            // UTF-8 解码
+            var out = '';
+            for (var _i2 = 0; _i2 < bytes.length;) {
+              var b0 = bytes[_i2++];
+              if (b0 < 0x80) {
+                out += String.fromCharCode(b0);
+              } else if (b0 >= 0xc0 && b0 < 0xe0) {
+                var b1 = bytes[_i2++];
+                out += String.fromCharCode((b0 & 0x1f) << 6 | b1 & 0x3f);
+              } else if (b0 >= 0xe0 && b0 < 0xf0) {
+                var _b = bytes[_i2++];
+                var b2 = bytes[_i2++];
+                out += String.fromCharCode((b0 & 0x0f) << 12 | (_b & 0x3f) << 6 | b2 & 0x3f);
+              } else {
+                // 超过 BMP 的字符（4 字节），转为代理对
+                var _b2 = bytes[_i2++];
+                var _b3 = bytes[_i2++];
+                var b3 = bytes[_i2++];
+                var codePoint = (b0 & 0x07) << 18 | (_b2 & 0x3f) << 12 | (_b3 & 0x3f) << 6 | b3 & 0x3f;
+                codePoint -= 0x10000;
+                out += String.fromCharCode(0xd800 + (codePoint >> 10 & 0x3ff));
+                out += String.fromCharCode(0xdc00 + (codePoint & 0x3ff));
+              }
+            }
+            return out;
+          }; // tempToken 为 base64URL(JSON.stringify({ access_token, expires_in, timestamp }))
+          decodedStr = safeBase64UrlDecodeToString(tempToken);
+          decoded = JSON.parse(decodedStr);
           if (!(!decoded || !decoded.access_token)) {
             _context3.n = 1;
             break;
