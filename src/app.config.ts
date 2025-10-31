@@ -4,6 +4,7 @@ export default defineAppConfig({
     'pages/message/index',
     'pages/profile/index',
     'pages/webview/index',
+    'pages/device-detail/index',
     'pages/index/index'
   ],
   window: {
@@ -18,9 +19,9 @@ export default defineAppConfig({
     backgroundColor: '#fff',
     borderStyle: 'black',
     list: [
-      { pagePath: 'pages/home/index', text: '首页' },
-      { pagePath: 'pages/message/index', text: '消息' },
-      { pagePath: 'pages/profile/index', text: '我的' }
+      { pagePath: 'pages/home/index', text: '首页', iconPath: 'assets/images/icon-home.png', selectedIconPath: 'assets/images/icon-home.png' },
+      { pagePath: 'pages/message/index', text: '消息', iconPath: 'assets/images/icon-message.png', selectedIconPath: 'assets/images/icon-message.png' },
+      { pagePath: 'pages/profile/index', text: '我的', iconPath: 'assets/images/icon-user.png', selectedIconPath: 'assets/images/icon-user.png' }
     ]
   },
   style: 'v2',

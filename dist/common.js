@@ -12,7 +12,7 @@
 var config = {
   // API 配置 - 强制使用开发环境
   api: {
-    baseUrl: 'http://192.168.199.63:3000' // 强制使用开发环境URL
+    baseUrl: 'http://192.168.199.153:3000' // 强制使用开发环境URL
   },
   // Logto 配置 - 使用新创建的小程序应用
   logto: {
@@ -20,14 +20,127 @@ var config = {
     appId: 'avmoloeby2yvj8bi6mwse',
     // 使用环境变量中的 App ID
     apiResource: 'https://ynsq.eboard.apps.aigrohub.com/api',
-    redirectUri: 'http://192.168.199.63:3000/api/auth/mini-callback' // 使用后端API回调
+    redirectUri: 'http://192.168.199.153:3000/api/auth/mini-callback' // 使用后端API回调
   },
   // 微信小程序配置
   weapp: {
-    appId: 'wxad4bf04718ee7738'
+    appId: 'wxa250ac138790e179'
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (config);
+
+/***/ }),
+
+/***/ "./src/utils/api.ts":
+/*!**************************!*\
+  !*** ./src/utils/api.ts ***!
+  \**************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* unused harmony export api */
+/* harmony import */ var _Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_objectSpread2_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/objectSpread2.js */ "./node_modules/@babel/runtime/helpers/esm/objectSpread2.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tarojs/taro */ "webpack/container/remote/@tarojs/taro");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config/index.ts");
+/* harmony import */ var _auth__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./auth */ "./src/utils/auth.ts");
+/* provided dependency */ var URLSearchParams = __webpack_require__(/*! @tarojs/runtime */ "webpack/container/remote/@tarojs/runtime")["URLSearchParams"];
+
+
+
+
+
+// 请求拦截器
+var request = function request(url) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var token = _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().getStorageSync('logto_token');
+  return new Promise(function (resolve, reject) {
+    _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().request({
+      url: "".concat(_config__WEBPACK_IMPORTED_MODULE_1__["default"].api.baseUrl).concat(url),
+      method: options.method || 'GET',
+      header: (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_objectSpread2_js__WEBPACK_IMPORTED_MODULE_3__["default"])((0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_objectSpread2_js__WEBPACK_IMPORTED_MODULE_3__["default"])({
+        'Content-Type': 'application/json'
+      }, token && {
+        'Authorization': "Bearer ".concat(token)
+      }), options.headers),
+      data: options.body ? JSON.parse(options.body) : undefined,
+      success: function success(res) {
+        if (res.statusCode === 401) {
+          // Token 过期，清除本地存储并跳转登录
+          _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().removeStorageSync('logto_token');
+          (0,_auth__WEBPACK_IMPORTED_MODULE_2__.navigateToWebViewLoginSimple)(); // 不能加await！
+          reject(new Error('登录已过期'));
+          return;
+        }
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(res.data);
+        } else {
+          reject(new Error("\u8BF7\u6C42\u5931\u8D25: ".concat(res.statusCode)));
+        }
+      },
+      fail: function fail(error) {
+        reject(error);
+      }
+    });
+  });
+};
+
+// API 方法封装
+var api = {
+  // 获取用户信息（小程序专用接口）
+  getUserInfo: function getUserInfo() {
+    return request('/api/mini/my-account');
+  },
+  // 小程序：获取分组（当前用户可见）
+  getMiniGroups: function getMiniGroups() {
+    return request('/api/mini/groups');
+  },
+  // 小程序：获取设备列表（分页）
+  getMiniDevices: function getMiniDevices(params) {
+    var query = new URLSearchParams();
+    if (params.groupId !== undefined) query.set('groupId', String(params.groupId));
+    if (params.page !== undefined) query.set('page', String(params.page));
+    if (params.pageSize !== undefined) query.set('pageSize', String(params.pageSize));
+    // search 参数优先级更高，与后台保持一致
+    if (params.search) {
+      query.set('search', params.search);
+    } else if (params.keyword) {
+      query.set('keyword', params.keyword);
+    }
+    if (params.devicetype) {
+      query.set('devicetype', params.devicetype);
+    }
+    var qs = query.toString() ? "?".concat(query.toString()) : '';
+    return request("/api/mini/devices".concat(qs));
+  },
+  // 获取设备详情（保留原有 Web 端接口，如后续需要）
+  getDeviceDetail: function getDeviceDetail(id) {
+    return request("/api/devices/".concat(id));
+  },
+  // 获取设备参数
+  getDeviceParameters: function getDeviceParameters(id) {
+    return request("/api/devices/".concat(id, "/parameters"));
+  },
+  // 根据参数名称列表获取参数详情
+  getParametersInfo: function getParametersInfo(parameterNames) {
+    var params = new URLSearchParams();
+    params.set('parameters', parameterNames.join(','));
+    return request("/api/parameters?".concat(params.toString()));
+  },
+  // 获取设备历史数据
+  getDeviceHistoryData: function getDeviceHistoryData(id, params) {
+    var query = new URLSearchParams();
+    query.set('parameters', params.parameters);
+    query.set('startDate', params.startDate);
+    query.set('endDate', params.endDate);
+    return request("/api/devices/".concat(id, "/history-data?").concat(query.toString()));
+  },
+  // 获取设备数据
+  getDeviceData: function getDeviceData(id, params) {
+    var queryString = params ? "?".concat(new URLSearchParams(params).toString()) : '';
+    return request("/api/devices/".concat(id, "/et-data").concat(queryString));
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (api);
 
 /***/ }),
 
@@ -204,69 +317,97 @@ var navigateToWebViewLoginSimple = /*#__PURE__*/function () {
 // 登录成功后处理（服务端代理模式）
 var handleLoginSuccess = /*#__PURE__*/function () {
   var _ref3 = (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_2__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_3__["default"])().m(function _callee3(tempToken) {
-    var safeBase64UrlDecodeToString, decodedStr, decoded, accessToken, expiresIn, meResp, userData, userInfo, errorMsg, _t3, _t4;
+    var decodeJWT, decoded, accessToken, expiresIn, meResp, userData, userInfo, errorMsg, _t3, _t4;
     return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_3__["default"])().w(function (_context3) {
       while (1) switch (_context3.p = _context3.n) {
         case 0:
           _context3.p = 0;
-          console.log('🔄 处理临时 token（本地解析）...');
+          console.log('🔄 处理临时 token（JWT解码）...');
           console.log('Temp token length:', tempToken ? tempToken.length : 0);
 
-          // ========== 小程序安全的 Base64URL 解码 ==========
-          safeBase64UrlDecodeToString = function safeBase64UrlDecodeToString(input) {
-            // 将 Base64URL 转为标准 Base64，并补齐 '='
-            var base64 = input.replace(/-/g, '+').replace(/_/g, '/');
-            var padLen = (4 - base64.length % 4) % 4;
-            var padded = base64 + '='.repeat(padLen);
-            var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-            var rev = {};
-            for (var i = 0; i < alphabet.length; i++) rev[alphabet[i]] = i;
-            var bytes = [];
-            var buffer = 0;
-            var bits = 0;
-            for (var _i = 0; _i < padded.length; _i++) {
-              var c = padded[_i];
-              if (c === '=') break;
-              var val = rev[c];
-              if (val === undefined) continue;
-              buffer = buffer << 6 | val;
-              bits += 6;
-              if (bits >= 8) {
-                bits -= 8;
-                var byte = buffer >> bits & 0xff;
-                bytes.push(byte);
-                buffer = buffer & (1 << bits) - 1;
+          // ========== JWT Token 解码 ==========
+          // JWT 格式: header.payload.signature
+          // 我们只需要解码 payload 部分来获取数据
+          decodeJWT = function decodeJWT(jwt) {
+            try {
+              var parts = jwt.split('.');
+              if (parts.length !== 3) {
+                throw new Error('无效的 JWT 格式');
               }
-            }
 
-            // UTF-8 解码
-            var out = '';
-            for (var _i2 = 0; _i2 < bytes.length;) {
-              var b0 = bytes[_i2++];
-              if (b0 < 0x80) {
-                out += String.fromCharCode(b0);
-              } else if (b0 >= 0xc0 && b0 < 0xe0) {
-                var b1 = bytes[_i2++];
-                out += String.fromCharCode((b0 & 0x1f) << 6 | b1 & 0x3f);
-              } else if (b0 >= 0xe0 && b0 < 0xf0) {
-                var _b = bytes[_i2++];
-                var b2 = bytes[_i2++];
-                out += String.fromCharCode((b0 & 0x0f) << 12 | (_b & 0x3f) << 6 | b2 & 0x3f);
-              } else {
-                // 超过 BMP 的字符（4 字节），转为代理对
-                var _b2 = bytes[_i2++];
-                var _b3 = bytes[_i2++];
-                var b3 = bytes[_i2++];
-                var codePoint = (b0 & 0x07) << 18 | (_b2 & 0x3f) << 12 | (_b3 & 0x3f) << 6 | b3 & 0x3f;
-                codePoint -= 0x10000;
-                out += String.fromCharCode(0xd800 + (codePoint >> 10 & 0x3ff));
-                out += String.fromCharCode(0xdc00 + (codePoint & 0x3ff));
+              // 解码 payload（第二个部分）
+              var payload = parts[1];
+
+              // Base64URL 解码
+              var safeBase64UrlDecodeToString = function safeBase64UrlDecodeToString(input) {
+                // 将 Base64URL 转为标准 Base64，并补齐 '='
+                var base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+                var padLen = (4 - base64.length % 4) % 4;
+                var padded = base64 + '='.repeat(padLen);
+                var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+                var rev = {};
+                for (var i = 0; i < alphabet.length; i++) rev[alphabet[i]] = i;
+                var bytes = [];
+                var buffer = 0;
+                var bits = 0;
+                for (var _i = 0; _i < padded.length; _i++) {
+                  var c = padded[_i];
+                  if (c === '=') break;
+                  var val = rev[c];
+                  if (val === undefined) continue;
+                  buffer = buffer << 6 | val;
+                  bits += 6;
+                  if (bits >= 8) {
+                    bits -= 8;
+                    var byte = buffer >> bits & 0xff;
+                    bytes.push(byte);
+                    buffer = buffer & (1 << bits) - 1;
+                  }
+                }
+
+                // UTF-8 解码
+                var out = '';
+                for (var _i2 = 0; _i2 < bytes.length;) {
+                  var b0 = bytes[_i2++];
+                  if (b0 < 0x80) {
+                    out += String.fromCharCode(b0);
+                  } else if (b0 >= 0xc0 && b0 < 0xe0) {
+                    var b1 = bytes[_i2++];
+                    out += String.fromCharCode((b0 & 0x1f) << 6 | b1 & 0x3f);
+                  } else if (b0 >= 0xe0 && b0 < 0xf0) {
+                    var _b = bytes[_i2++];
+                    var b2 = bytes[_i2++];
+                    out += String.fromCharCode((b0 & 0x0f) << 12 | (_b & 0x3f) << 6 | b2 & 0x3f);
+                  } else {
+                    // 超过 BMP 的字符（4 字节），转为代理对
+                    var _b2 = bytes[_i2++];
+                    var _b3 = bytes[_i2++];
+                    var b3 = bytes[_i2++];
+                    var codePoint = (b0 & 0x07) << 18 | (_b2 & 0x3f) << 12 | (_b3 & 0x3f) << 6 | b3 & 0x3f;
+                    codePoint -= 0x10000;
+                    out += String.fromCharCode(0xd800 + (codePoint >> 10 & 0x3ff));
+                    out += String.fromCharCode(0xdc00 + (codePoint & 0x3ff));
+                  }
+                }
+                return out;
+              };
+              var decodedStr = safeBase64UrlDecodeToString(payload);
+              var _decoded = JSON.parse(decodedStr);
+
+              // 验证过期时间（exp 字段，单位：秒）
+              if (_decoded.exp) {
+                var now = Math.floor(Date.now() / 1000);
+                if (_decoded.exp < now) {
+                  throw new Error('临时 token 已过期');
+                }
               }
+              return _decoded;
+            } catch (error) {
+              console.error('JWT 解码失败:', error);
+              throw new Error('无效的临时凭证格式');
             }
-            return out;
-          }; // tempToken 为 base64URL(JSON.stringify({ access_token, expires_in, timestamp }))
-          decodedStr = safeBase64UrlDecodeToString(tempToken);
-          decoded = JSON.parse(decodedStr);
+          }; // 解码 JWT token
+          decoded = decodeJWT(tempToken);
           if (!(!decoded || !decoded.access_token)) {
             _context3.n = 1;
             break;
@@ -450,6 +591,46 @@ var getAuthHeaders = function getAuthHeaders() {
   clearLoginData: clearLoginData,
   getAuthHeaders: getAuthHeaders
 });
+
+/***/ }),
+
+/***/ "./src/assets/images/icon-qx.png":
+/*!***************************************!*\
+  !*** ./src/assets/images/icon-qx.png ***!
+  \***************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "assets/images/icon-qx.png";
+
+/***/ }),
+
+/***/ "./src/assets/images/icon-sq.png":
+/*!***************************************!*\
+  !*** ./src/assets/images/icon-sq.png ***!
+  \***************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "assets/images/icon-sq.png";
+
+/***/ }),
+
+/***/ "./src/assets/images/icon-tianqiqxz.png":
+/*!**********************************************!*\
+  !*** ./src/assets/images/icon-tianqiqxz.png ***!
+  \**********************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "assets/images/icon-tianqiqxz.png";
+
+/***/ }),
+
+/***/ "./src/assets/images/icon-zhishang.png":
+/*!*********************************************!*\
+  !*** ./src/assets/images/icon-zhishang.png ***!
+  \*********************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "assets/images/icon-zhishang.png";
 
 /***/ })
 

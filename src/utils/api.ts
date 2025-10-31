@@ -40,19 +40,27 @@ const request = (url: string, options: RequestInit = {}) => {
 
 // API 方法封装
 export const api = {
-  // 获取用户信息
-  getUserInfo: () => request('/api/logto/my-account'),
+  // 获取用户信息（小程序专用接口）
+  getUserInfo: () => request('/api/mini/my-account'),
   
   // 小程序：获取分组（当前用户可见）
   getMiniGroups: () => request('/api/mini/groups'),
 
   // 小程序：获取设备列表（分页）
-  getMiniDevices: (params: { groupId?: string | number, page?: number, pageSize?: number, keyword?: string }) => {
+  getMiniDevices: (params: { groupId?: string | number, page?: number, pageSize?: number, keyword?: string, search?: string, devicetype?: string }) => {
     const query = new URLSearchParams()
     if (params.groupId !== undefined) query.set('groupId', String(params.groupId))
     if (params.page !== undefined) query.set('page', String(params.page))
     if (params.pageSize !== undefined) query.set('pageSize', String(params.pageSize))
-    if (params.keyword) query.set('keyword', params.keyword)
+    // search 参数优先级更高，与后台保持一致
+    if (params.search) {
+      query.set('search', params.search)
+    } else if (params.keyword) {
+      query.set('keyword', params.keyword)
+    }
+    if (params.devicetype) {
+      query.set('devicetype', params.devicetype)
+    }
     const qs = query.toString() ? `?${query.toString()}` : ''
     return request(`/api/mini/devices${qs}`)
   },
@@ -62,6 +70,22 @@ export const api = {
   
   // 获取设备参数
   getDeviceParameters: (id: number) => request(`/api/devices/${id}/parameters`),
+  
+  // 根据参数名称列表获取参数详情
+  getParametersInfo: (parameterNames: string[]) => {
+    const params = new URLSearchParams()
+    params.set('parameters', parameterNames.join(','))
+    return request(`/api/parameters?${params.toString()}`)
+  },
+  
+  // 获取设备历史数据
+  getDeviceHistoryData: (id: number, params: { parameters: string, startDate: string, endDate: string }) => {
+    const query = new URLSearchParams()
+    query.set('parameters', params.parameters)
+    query.set('startDate', params.startDate)
+    query.set('endDate', params.endDate)
+    return request(`/api/devices/${id}/history-data?${query.toString()}`)
+  },
   
   // 获取设备数据
   getDeviceData: (id: number, params?: any) => {

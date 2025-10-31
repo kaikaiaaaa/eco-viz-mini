@@ -112,71 +112,101 @@ export const navigateToWebViewLoginSimple = async () => {
 // 登录成功后处理（服务端代理模式）
 export const handleLoginSuccess = async (tempToken: string) => {
   try {
-    console.log('🔄 处理临时 token（本地解析）...')
+    console.log('🔄 处理临时 token（JWT解码）...')
     console.log('Temp token length:', tempToken ? tempToken.length : 0)
 
-    // ========== 小程序安全的 Base64URL 解码 ==========
-    const safeBase64UrlDecodeToString = (input: string): string => {
-      // 将 Base64URL 转为标准 Base64，并补齐 '='
-      const base64 = input.replace(/-/g, '+').replace(/_/g, '/')
-      const padLen = (4 - (base64.length % 4)) % 4
-      const padded = base64 + '='.repeat(padLen)
-
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-      const rev: Record<string, number> = {}
-      for (let i = 0; i < alphabet.length; i++) rev[alphabet[i]] = i
-
-      const bytes: Array<number> = []
-      let buffer = 0
-      let bits = 0
-      for (let i = 0; i < padded.length; i++) {
-        const c = padded[i]
-        if (c === '=') break
-        const val = rev[c]
-        if (val === undefined) continue
-        buffer = (buffer << 6) | val
-        bits += 6
-        if (bits >= 8) {
-          bits -= 8
-          const byte = (buffer >> bits) & 0xff
-          bytes.push(byte)
-          buffer = buffer & ((1 << bits) - 1)
+    // ========== JWT Token 解码 ==========
+    // JWT 格式: header.payload.signature
+    // 我们只需要解码 payload 部分来获取数据
+    const decodeJWT = (jwt: string): any => {
+      try {
+        const parts = jwt.split('.')
+        if (parts.length !== 3) {
+          throw new Error('无效的 JWT 格式')
         }
-      }
 
-      // UTF-8 解码
-      let out = ''
-      for (let i = 0; i < bytes.length; ) {
-        const b0 = bytes[i++]
-        if (b0 < 0x80) {
-          out += String.fromCharCode(b0)
-        } else if (b0 >= 0xc0 && b0 < 0xe0) {
-          const b1 = bytes[i++]
-          out += String.fromCharCode(((b0 & 0x1f) << 6) | (b1 & 0x3f))
-        } else if (b0 >= 0xe0 && b0 < 0xf0) {
-          const b1 = bytes[i++]
-          const b2 = bytes[i++]
-          out += String.fromCharCode(
-            ((b0 & 0x0f) << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f)
-          )
-        } else {
-          // 超过 BMP 的字符（4 字节），转为代理对
-          const b1 = bytes[i++]
-          const b2 = bytes[i++]
-          const b3 = bytes[i++]
-          let codePoint =
-            ((b0 & 0x07) << 18) | ((b1 & 0x3f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)
-          codePoint -= 0x10000
-          out += String.fromCharCode(0xd800 + ((codePoint >> 10) & 0x3ff))
-          out += String.fromCharCode(0xdc00 + (codePoint & 0x3ff))
+        // 解码 payload（第二个部分）
+        const payload = parts[1]
+        
+        // Base64URL 解码
+        const safeBase64UrlDecodeToString = (input: string): string => {
+          // 将 Base64URL 转为标准 Base64，并补齐 '='
+          const base64 = input.replace(/-/g, '+').replace(/_/g, '/')
+          const padLen = (4 - (base64.length % 4)) % 4
+          const padded = base64 + '='.repeat(padLen)
+
+          const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+          const rev: Record<string, number> = {}
+          for (let i = 0; i < alphabet.length; i++) rev[alphabet[i]] = i
+
+          const bytes: Array<number> = []
+          let buffer = 0
+          let bits = 0
+          for (let i = 0; i < padded.length; i++) {
+            const c = padded[i]
+            if (c === '=') break
+            const val = rev[c]
+            if (val === undefined) continue
+            buffer = (buffer << 6) | val
+            bits += 6
+            if (bits >= 8) {
+              bits -= 8
+              const byte = (buffer >> bits) & 0xff
+              bytes.push(byte)
+              buffer = buffer & ((1 << bits) - 1)
+            }
+          }
+
+          // UTF-8 解码
+          let out = ''
+          for (let i = 0; i < bytes.length; ) {
+            const b0 = bytes[i++]
+            if (b0 < 0x80) {
+              out += String.fromCharCode(b0)
+            } else if (b0 >= 0xc0 && b0 < 0xe0) {
+              const b1 = bytes[i++]
+              out += String.fromCharCode(((b0 & 0x1f) << 6) | (b1 & 0x3f))
+            } else if (b0 >= 0xe0 && b0 < 0xf0) {
+              const b1 = bytes[i++]
+              const b2 = bytes[i++]
+              out += String.fromCharCode(
+                ((b0 & 0x0f) << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f)
+              )
+            } else {
+              // 超过 BMP 的字符（4 字节），转为代理对
+              const b1 = bytes[i++]
+              const b2 = bytes[i++]
+              const b3 = bytes[i++]
+              let codePoint =
+                ((b0 & 0x07) << 18) | ((b1 & 0x3f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)
+              codePoint -= 0x10000
+              out += String.fromCharCode(0xd800 + ((codePoint >> 10) & 0x3ff))
+              out += String.fromCharCode(0xdc00 + (codePoint & 0x3ff))
+            }
+          }
+          return out
         }
+
+        const decodedStr = safeBase64UrlDecodeToString(payload)
+        const decoded = JSON.parse(decodedStr)
+
+        // 验证过期时间（exp 字段，单位：秒）
+        if (decoded.exp) {
+          const now = Math.floor(Date.now() / 1000)
+          if (decoded.exp < now) {
+            throw new Error('临时 token 已过期')
+          }
+        }
+
+        return decoded
+      } catch (error) {
+        console.error('JWT 解码失败:', error)
+        throw new Error('无效的临时凭证格式')
       }
-      return out
     }
 
-    // tempToken 为 base64URL(JSON.stringify({ access_token, expires_in, timestamp }))
-    const decodedStr = safeBase64UrlDecodeToString(tempToken)
-    const decoded = JSON.parse(decodedStr) as { access_token: string; expires_in?: number; timestamp?: number }
+    // 解码 JWT token
+    const decoded = decodeJWT(tempToken)
 
     if (!decoded || !decoded.access_token) {
       throw new Error('无效的临时凭证')

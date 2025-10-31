@@ -200,10 +200,18 @@
 /******/ 				"webpack/container/remote/@tarojs/plugin-framework-react/dist/runtime",
 /******/ 				"webpack/container/remote/react-dom"
 /******/ 			],
+/******/ 			"pages/device-detail/index": [
+/******/ 				"webpack/container/remote/echarts/core",
+/******/ 				"webpack/container/remote/echarts/charts",
+/******/ 				"webpack/container/remote/echarts/components",
+/******/ 				"webpack/container/remote/echarts/renderers",
+/******/ 				"webpack/container/remote/dayjs"
+/******/ 			],
 /******/ 			"common": [
 /******/ 				"webpack/container/remote/@tarojs/runtime",
 /******/ 				"webpack/container/remote/@tarojs/taro",
 /******/ 				"webpack/container/remote/react",
+/******/ 				"webpack/container/remote/taro-ui",
 /******/ 				"webpack/container/remote/react/jsx-runtime"
 /******/ 			]
 /******/ 		};
@@ -223,6 +231,31 @@
 /******/ 				"./react-dom",
 /******/ 				null
 /******/ 			],
+/******/ 			"webpack/container/remote/echarts/core": [
+/******/ 				"default",
+/******/ 				"./echarts/core",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/echarts/charts": [
+/******/ 				"default",
+/******/ 				"./echarts/charts",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/echarts/components": [
+/******/ 				"default",
+/******/ 				"./echarts/components",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/echarts/renderers": [
+/******/ 				"default",
+/******/ 				"./echarts/renderers",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/dayjs": [
+/******/ 				"default",
+/******/ 				"./dayjs",
+/******/ 				null
+/******/ 			],
 /******/ 			"webpack/container/remote/@tarojs/runtime": [
 /******/ 				"default",
 /******/ 				"./@tarojs/runtime",
@@ -236,6 +269,11 @@
 /******/ 			"webpack/container/remote/react": [
 /******/ 				"default",
 /******/ 				"./react",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/taro-ui": [
+/******/ 				"default",
+/******/ 				"./taro-ui",
 /******/ 				null
 /******/ 			],
 /******/ 			"webpack/container/remote/react/jsx-runtime": [
