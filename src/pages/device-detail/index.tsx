@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { View, Text, Image, Picker } from '@tarojs/components'
+import { View, Text, Picker, Image } from '@tarojs/components'
 import { AtButton, AtActivityIndicator, AtMessage } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import api from '../../utils/api'
@@ -8,54 +8,7 @@ import EcCanvas from '../../components/chart/ec-canvas'
 import 'taro-ui/dist/style/index.scss'
 import './index.scss'
 import dayjs from 'dayjs'
-
-// 导入设备图标
-const iconSq = require('../../assets/images/icon-sq.png')
-const iconQx = require('../../assets/images/icon-qx.png')
-const iconZhishang = require('../../assets/images/icon-zhishang.png')
-const iconTianqiqxz = require('../../assets/images/icon-tianqiqxz.png')
-
-// 设备图标列表
-const deviceIconList = [
-  { connectorIdentifier: 'huayi', deviceType: '1', icon: iconSq },
-  { connectorIdentifier: 'huayi', deviceType: '2', icon: iconQx },
-  { connectorIdentifier: 'ecois', deviceType: '1', icon: iconZhishang },
-  { connectorIdentifier: 'ecois', deviceType: '2', icon: iconTianqiqxz },
-]
-
-// 获取设备图标
-const getDeviceIcon = (connectorIdentifier: string, deviceType: string) => {
-  const icon = deviceIconList.find(
-    (item: any) => item.connectorIdentifier === connectorIdentifier && item.deviceType === deviceType
-  )
-  return icon ? icon.icon : null
-}
-
-// 格式化时间
-const formatTime = (timestamp: string | null) => {
-  if (!timestamp) return '从未上报'
-  try {
-    return dayjs(timestamp).format('YYYY/MM/DD HH:mm')
-  } catch {
-    return '从未上报'
-  }
-}
-
-// 格式化相对时间
-const formatRelativeTime = (timestamp: string | null) => {
-  if (!timestamp) return '从未上报'
-  try {
-    const deviceLastUpdate = dayjs(timestamp)
-    const now = dayjs()
-    const diffMinutes = now.diff(deviceLastUpdate, 'minute')
-    if (diffMinutes < 1) return '刚刚'
-    if (diffMinutes < 60) return `${diffMinutes}分钟前`
-    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}小时前`
-    return `${Math.floor(diffMinutes / 1440)}天前`
-  } catch {
-    return '从未上报'
-  }
-}
+const iconEdit = require('../../assets/images/icon-edit.png')
 
 // 根据设备类型获取参数列表
 const getParametersByDeviceType = (deviceType: string): string[] => {
@@ -78,12 +31,90 @@ export default function DeviceDetailPage() {
   const [chartLoading, setChartLoading] = useState(false)
   const [parameters, setParameters] = useState<any[]>([])
   const [selectedParameter, setSelectedParameter] = useState<string>('')
+  const [displayParameter, setDisplayParameter] = useState<string>('')
   const [chartData, setChartData] = useState<any[]>([])
   const [nodeData, setNodeData] = useState<any[]>([])
   const [dateRange, setDateRange] = useState({
     start: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
     end: dayjs().format('YYYY-MM-DD')
   })
+
+  const isCrossYear = useMemo(() => {
+    return dayjs(dateRange.start).year() !== dayjs(dateRange.end).year()
+  }, [dateRange.start, dateRange.end])
+
+  const formatAxisLabel = useCallback((timestamp: string) => {
+    if (!timestamp) return ''
+    const date = dayjs(timestamp)
+    const datePart = isCrossYear ? date.format('YYYY/MM/DD') : date.format('MM/DD')
+    return `${datePart}\n${date.format('HH:mm')}`
+  }, [isCrossYear])
+
+  const formatTooltipLabel = useCallback((timestamp: string) => {
+    if (!timestamp) return ''
+    const date = dayjs(timestamp)
+    return isCrossYear ? date.format('YYYY/MM/DD HH:mm') : date.format('MM/DD HH:mm')
+  }, [isCrossYear])
+
+const MAX_RANGE_DAYS = 365
+
+const validateDateRange = useCallback((start: string, end: string, showMessage = true) => {
+  const startDay = dayjs(start)
+  const endDay = dayjs(end)
+
+  if (!startDay.isValid() || !endDay.isValid()) {
+    if (showMessage) {
+      Taro.atMessage({ message: '请选择有效的时间范围', type: 'warning' })
+    }
+    return false
+  }
+
+  if (endDay.isBefore(startDay)) {
+    if (showMessage) {
+      Taro.atMessage({ message: '结束日期不能早于开始日期', type: 'warning' })
+    }
+    return false
+  }
+
+  if (endDay.diff(startDay, 'day') > MAX_RANGE_DAYS) {
+    if (showMessage) {
+      Taro.atMessage({ message: '时间范围最多查询一年，请重新选择', type: 'warning' })
+    }
+    return false
+  }
+
+  return true
+}, [])
+
+const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
+  let nextRange = {
+    ...dateRange,
+    [type]: value
+  }
+
+  const startDay = dayjs(nextRange.start)
+  const endDay = dayjs(nextRange.end)
+
+  if (startDay.isValid() && endDay.isValid() && endDay.isBefore(startDay)) {
+    if (type === 'start') {
+      nextRange = {
+        ...nextRange,
+        end: value
+      }
+    } else {
+      nextRange = {
+        ...nextRange,
+        start: value
+      }
+    }
+  }
+
+  if (!validateDateRange(nextRange.start, nextRange.end)) {
+    return
+  }
+
+  setDateRange(nextRange)
+}, [dateRange, validateDateRange])
 
   useEffect(() => {
     const pages = Taro.getCurrentPages()
@@ -171,6 +202,10 @@ export default function DeviceDetailPage() {
       return
     }
 
+    if (!validateDateRange(dateRange.start, dateRange.end)) {
+      return
+    }
+
     try {
       setChartLoading(true)
       const startDate = `${dateRange.start} 00:00:00`
@@ -195,6 +230,7 @@ export default function DeviceDetailPage() {
           setChartData(data)
           setNodeData([])
         }
+        setDisplayParameter(param)
       } else {
         Taro.atMessage({ message: resp?.message || '获取历史数据失败', type: 'error' })
       }
@@ -219,15 +255,20 @@ export default function DeviceDetailPage() {
       return
     }
 
+    if (!validateDateRange(dateRange.start, dateRange.end)) {
+      return
+    }
+
     try {
       setChartLoading(true)
       const startDate = `${dateRange.start} 00:00:00`
       const endDate = `${dateRange.end} 23:59:59`
+      const currentParameter = selectedParameter
       
-      console.log('请求参数:', { deviceId, parameters: selectedParameter, startDate, endDate })
+      console.log('请求参数:', { deviceId, parameters: currentParameter, startDate, endDate })
       
       const resp: any = await api.getDeviceHistoryData(deviceId, {
-        parameters: selectedParameter,
+        parameters: currentParameter,
         startDate,
         endDate
       })
@@ -243,6 +284,7 @@ export default function DeviceDetailPage() {
           setChartData(data)
           setNodeData([])
         }
+        setDisplayParameter(currentParameter)
       } else {
         Taro.atMessage({ message: resp?.message || '获取历史数据失败', type: 'error' })
       }
@@ -252,7 +294,7 @@ export default function DeviceDetailPage() {
     } finally {
       setChartLoading(false)
     }
-  }, [deviceId, selectedParameter, dateRange])
+  }, [deviceId, selectedParameter, dateRange, validateDateRange])
 
   // 获取参数信息
   const getParameterInfo = (parameter: string) => {
@@ -274,31 +316,49 @@ export default function DeviceDetailPage() {
     return colors[index % colors.length]
   }
 
-  const formatTimestamp = (timestamp: string) => {
-    return dayjs(timestamp).format('MM/DD HH:mm')
-  }
-
   // 生成图表配置 - 无节点数据
   const chartOption = useMemo(() => {
     if (chartData.length === 0) return null
 
-    const timestamps = chartData.map(item => formatTimestamp(item.timestamp))
-    const values = chartData.map(item => item[selectedParameter] || 0)
+    const valueKey = displayParameter || parameters[0]?.parameter || ''
+    const timestamps = chartData.map(item => item.timestamp)
+    const values = chartData.map(item => {
+      const raw = item[valueKey] ?? item.value ?? 0
+      return typeof raw === 'number' ? raw : parseFloat(raw) || 0
+    })
+    const labelInterval = isCrossYear ? 'auto' : Math.max(0, Math.ceil(timestamps.length / 6) - 1)
 
     return {
       tooltip: {
         trigger: 'axis',
+        confine: true,
+        renderMode: 'richText',
+        extraCssText: 'white-space: pre-line; height: auto; min-height: auto;',
         formatter: (params: any) => {
-          const unit = getParameterUnit(selectedParameter)
-          const value = parseFloat(params[0].value).toFixed(2)
-          return `${formatTimestamp(params[0].axisValue)}<br/>${params[0].marker}${getParameterName(selectedParameter)}: ${value}${unit ? ' ' + unit : ''}`
+          const param = Array.isArray(params) ? params[0] : params
+          if (!param) return ''
+          const dataPoint = chartData[param.dataIndex]
+          const unit = getParameterUnit(valueKey)
+          const rawValue = dataPoint ? (dataPoint[valueKey] ?? dataPoint.value ?? param.value) : param.value
+          const value = rawValue !== undefined && rawValue !== null
+            ? parseFloat(rawValue.toString()).toFixed(2)
+            : '0.00'
+          const timeLabel = dataPoint
+            ? formatTooltipLabel(dataPoint.timestamp)
+            : formatTooltipLabel(param.axisValue)
+          const lines: string[] = []
+          if (timeLabel) {
+            lines.push(timeLabel)
+          }
+          lines.push(`${param.marker}${getParameterName(valueKey)}: ${value}${unit ? ' ' + unit : ''}`)
+          return lines.join('\n')
         }
       },
       grid: {
         left: '3%',
         right: '3%',
         bottom: '10%',
-        top: '10%',
+        top: '3%',
         containLabel: true
       },
       xAxis: {
@@ -308,12 +368,14 @@ export default function DeviceDetailPage() {
         axisLabel: {
           rotate: 0,
           fontSize: 12,
-          interval: Math.max(0, Math.floor(timestamps.length / 6))
+          interval: labelInterval,
+          formatter: (value: string) => formatAxisLabel(value),
+          hideOverlap: true
         }
       },
       yAxis: {
         type: 'value',
-        name: getParameterUnit(selectedParameter),
+        name: getParameterUnit(valueKey),
         axisLabel: {
           formatter: (value: number) => {
             return parseFloat(value.toString()).toFixed(1)
@@ -321,7 +383,7 @@ export default function DeviceDetailPage() {
         }
       },
       series: [{
-        name: getParameterName(selectedParameter),
+        name: getParameterName(valueKey),
         type: 'line',
         data: values,
         smooth: true,
@@ -335,7 +397,7 @@ export default function DeviceDetailPage() {
         symbol: 'none'
       }]
     }
-  }, [chartData, selectedParameter, parameters])
+  }, [chartData, displayParameter, parameters, formatAxisLabel, formatTooltipLabel])
 
   // 生成图表配置 - 有节点数据
   const nodeChartOption = useMemo(() => {
@@ -358,15 +420,21 @@ export default function DeviceDetailPage() {
       return depthA - depthB
     })
 
+    const valueKey = displayParameter || parameters[0]?.parameter || ''
     const timestamps = Array.from(new Set(nodeData.map(item => item.timestamp))).sort()
-    const formattedTimestamps = timestamps.map(ts => formatTimestamp(ts))
+    const labelInterval = isCrossYear ? 'auto' : Math.max(0, Math.ceil(timestamps.length / 6) - 1)
 
     const series = sortedNodes.map((node, index) => ({
       name: node === '0' ? '地表' : `${node}cm`,
       type: 'line',
       data: timestamps.map(ts => {
         const nodeData = nodeGroups.get(node)?.find(d => d.timestamp === ts)
-        return nodeData ? nodeData.value : null
+        if (!nodeData) return null
+        const raw = nodeData.value ?? nodeData[valueKey]
+        if (raw === null || raw === undefined) {
+          return null
+        }
+        return typeof raw === 'number' ? raw : parseFloat(raw)
       }),
       smooth: true,
       lineStyle: {
@@ -385,22 +453,33 @@ export default function DeviceDetailPage() {
     return {
       tooltip: {
         trigger: 'axis',
+        confine: true,
+        renderMode: 'richText',
+        extraCssText: 'white-space: pre-line; height: auto; min-height: auto;',
         formatter: (params: any) => {
-          let result = formatTimestamp(params[0].axisValue) + '<br/>'
+          const list = Array.isArray(params) ? params : [params]
+          const first = list[0]
+          const timeLabel = first ? formatTooltipLabel(first.axisValue) : ''
+          const lines: string[] = []
+          if (timeLabel) {
+            lines.push(timeLabel)
+          }
           if (hasOnlySurfaceNode) {
-            const value = parseFloat(params[0].value).toFixed(2)
-            const unit = getParameterUnit(selectedParameter)
-            result += `${value}${unit ? ' ' + unit : ''}`
+            const value = first && first.value !== null && first.value !== undefined
+              ? parseFloat(first.value).toFixed(2)
+              : '0.00'
+            const unit = getParameterUnit(valueKey)
+            lines.push(`${value}${unit ? ' ' + unit : ''}`)
           } else {
-            params.forEach((param: any) => {
-              if (param.value !== null) {
-                const unit = getParameterUnit(selectedParameter)
+            list.forEach((param: any) => {
+              if (param.value !== null && param.value !== undefined) {
+                const unit = getParameterUnit(valueKey)
                 const value = parseFloat(param.value).toFixed(2)
-                result += `${param.marker}${param.seriesName}: ${value}${unit ? ' ' + unit : ''}<br/>`
+                lines.push(`${param.marker}${param.seriesName}: ${value}${unit ? ' ' + unit : ''}`)
               }
             })
           }
-          return result
+          return lines.join('\n')
         }
       },
       ...(hasOnlySurfaceNode ? {} : {
@@ -410,25 +489,27 @@ export default function DeviceDetailPage() {
         }
       }),
       grid: {
-        left: '3%',
-        right: '3%',
+        left: '2%',
+        right: '2%',
         bottom: hasOnlySurfaceNode ? '10%' : '20%',
-        top: '10%',
+        top: '2%',
         containLabel: true
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: formattedTimestamps,
+        data: timestamps,
         axisLabel: {
           rotate: 0,
           fontSize: 12,
-          interval: Math.max(0, Math.floor(formattedTimestamps.length / 6))
+          interval: labelInterval,
+          formatter: (value: string) => formatAxisLabel(value),
+          hideOverlap: true
         }
       },
       yAxis: {
         type: 'value',
-        name: getParameterUnit(selectedParameter),
+        name: getParameterUnit(valueKey),
         axisLabel: {
           formatter: (value: number) => {
             return parseFloat(value.toString()).toFixed(1)
@@ -437,7 +518,7 @@ export default function DeviceDetailPage() {
       },
       series: series
     }
-  }, [nodeData, selectedParameter, parameters])
+  }, [nodeData, displayParameter, parameters, formatAxisLabel, formatTooltipLabel])
 
 
   if (loading) {
@@ -456,12 +537,6 @@ export default function DeviceDetailPage() {
     )
   }
 
-  const deviceIcon = getDeviceIcon(device.connectorIdentifier || '', device.deviceType || '')
-  const lastUpdateTime = formatTime(device.latestCollectTime || device.lastUpdate)
-  const location = device.province && device.city && device.district
-    ? `${device.province}省${device.city}市${device.district}区`
-    : device.location || '--'
-
   return (
     <View className='device-detail-page'>
       <AtMessage />
@@ -471,54 +546,40 @@ export default function DeviceDetailPage() {
           background:'#fff',
           margin:'16px',
           borderRadius:'12px',
-          overflow:'hidden',
-          boxShadow:'0 2px 8px rgba(0,0,0,0.08)'
+          padding:'20px',
+          boxShadow:'0 2px 8px rgba(0,0,0,0.08)',
+          position:'relative'
         }}>
-          <View style={{
-            background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            padding:'20px',
-            display:'flex',
-            alignItems:'center'
-          }}>
-            {deviceIcon && (
-              <Image
-                src={deviceIcon}
-                style={{
-                  width:'80px',
-                  height:'100px',
-                  objectFit:'contain',
-                  marginRight:'16px'
-                }}
-                mode='aspectFit'
-              />
-            )}
-            <View style={{flex:1}}>
-              <Text style={{fontSize:'20px',fontWeight:600,color:'#fff',display:'block',marginBottom:'8px'}}>
-                {device.alias || device.name || device.sn}
-              </Text>
-              <Text style={{fontSize:'14px',color:'rgba(255,255,255,0.9)',display:'block'}}>
-                No.{device.sn}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={{padding:'20px'}}>
-            <View style={{display:'flex',justifyContent:'space-between',marginBottom:'16px',paddingBottom:'16px',borderBottom:'1px solid #f0f0f0'}}>
-              <Text style={{fontSize:'14px',color:'#999'}}>设备名称</Text>
-              <Text style={{fontSize:'14px',color:'#222',fontWeight:500}}>{device.alias || device.name || device.sn}</Text>
-            </View>
-            <View style={{display:'flex',justifyContent:'space-between',marginBottom:'16px',paddingBottom:'16px',borderBottom:'1px solid #f0f0f0'}}>
-              <Text style={{fontSize:'14px',color:'#999'}}>设备编号</Text>
-              <Text style={{fontSize:'14px',color:'#222',fontWeight:500}}>{device.sn}</Text>
-            </View>
-            <View style={{display:'flex',justifyContent:'space-between',marginBottom:'16px',paddingBottom:'16px',borderBottom:'1px solid #f0f0f0'}}>
-              <Text style={{fontSize:'14px',color:'#999'}}>最新采集时间</Text>
-              <Text style={{fontSize:'14px',color:'#222',fontWeight:500}}>{lastUpdateTime}</Text>
-            </View>
-            <View style={{display:'flex',justifyContent:'space-between'}}>
-              <Text style={{fontSize:'14px',color:'#999'}}>地理位置</Text>
-              <Text style={{fontSize:'14px',color:'#222',fontWeight:500}}>{location}</Text>
-            </View>
+          <Text style={{fontSize:'20px',fontWeight:600,color:'#222',display:'block',marginBottom:'8px'}}>
+            {device.alias || device.name || device.sn}
+          </Text>
+          <Text style={{fontSize:'14px',color:'#666'}}>
+            No.{device.sn}
+          </Text>
+          <View
+            onClick={() => {
+              Taro.navigateTo({
+                url: `/pages/device-threshold-edit/index?deviceId=${device.id}&deviceSn=${encodeURIComponent(device.sn)}`
+              })
+            }}
+            style={{
+              position:'absolute',
+              top:'16px',
+              right:'16px',
+              width:'32px',
+              height:'32px',
+              borderRadius:'16px',
+              background:'#f5f6f7',
+              display:'flex',
+              alignItems:'center',
+              justifyContent:'center'
+            }}
+          >
+            <Image
+              src={iconEdit}
+              style={{width:'16px',height:'16px'}}
+              mode='aspectFit'
+            />
           </View>
         </View>
 
@@ -561,7 +622,6 @@ export default function DeviceDetailPage() {
                       key={param.parameter}
                       onClick={() => {
                         setSelectedParameter(param.parameter)
-                        setTimeout(() => loadChartData(), 300)
                       }}
                       style={{
                         padding:'8px 16px',
@@ -588,12 +648,15 @@ export default function DeviceDetailPage() {
               <View style={{
                 display:'flex',
                 gap:'8px',
-                alignItems:'center'
+                alignItems:'center',
+                justifyContent:'flex-start',
+                flexWrap:'wrap',
+                width:'100%'
               }}>
                 <Picker
                   mode='date'
                   value={dateRange.start}
-                  onChange={(e: any) => setDateRange({...dateRange, start: e.detail.value})}
+                  onChange={(e: any) => updateDateRange('start', e.detail.value)}
                 >
                   <View style={{
                     flex:1,
@@ -611,7 +674,7 @@ export default function DeviceDetailPage() {
                 <Picker
                   mode='date'
                   value={dateRange.end}
-                  onChange={(e: any) => setDateRange({...dateRange, end: e.detail.value})}
+                  onChange={(e: any) => updateDateRange('end', e.detail.value)}
                 >
                   <View style={{
                     flex:1,
@@ -625,18 +688,24 @@ export default function DeviceDetailPage() {
                     {dateRange.end}
                   </View>
                 </Picker>
+                <AtButton
+                  type='primary'
+                  size='small'
+                  onClick={loadChartData}
+                  disabled={chartLoading}
+                  customStyle={{
+                    background: chartLoading ? '#ccc' : '#1B9AEE',
+                    padding: '0 16px',
+                    height: '36px',
+                    lineHeight: '36px',
+                    borderRadius: '18px',
+                    marginLeft: 'auto'
+                  }}
+                >
+                  {chartLoading ? '查询中...' : '查询'}
+                </AtButton>
               </View>
             </View>
-
-            {/* 查询按钮 */}
-            <AtButton
-              type='primary'
-              onClick={loadChartData}
-              disabled={chartLoading}
-              customStyle={{background:chartLoading?'#ccc':'#1B9AEE',marginBottom:'20px'}}
-            >
-              {chartLoading ? '加载中...' : '查询'}
-            </AtButton>
 
             {/* 图表区域 */}
             <View style={{
@@ -645,17 +714,17 @@ export default function DeviceDetailPage() {
               borderRadius:'8px',
               padding:'16px'
             }}>
-              {chartLoading ? (
-                <View style={{display:'flex',justifyContent:'center',alignItems:'center',height:'300px'}}>
-                  <AtActivityIndicator mode='normal' size={30} content='加载中...' color='#1B9AEE' />
-                </View>
-              ) : chartData.length > 0 || nodeData.length > 0 ? (
+              {chartData.length > 0 || nodeData.length > 0 ? (
                 <View style={{width:'100%',height:'300px'}}>
                   <EcCanvas
                     option={nodeData.length > 0 ? nodeChartOption : chartOption}
                     canvasId='chart-canvas'
                     style={{width:'100%',height:'300px'}}
                   />
+                </View>
+              ) : chartLoading ? (
+                <View style={{display:'flex',justifyContent:'center',alignItems:'center',height:'300px'}}>
+                  <Text style={{fontSize:'14px',color:'#666'}}>查询中...</Text>
                 </View>
               ) : (
                 <View style={{display:'flex',justifyContent:'center',alignItems:'center',height:'300px'}}>

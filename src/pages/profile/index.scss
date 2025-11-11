@@ -1,0 +1,234 @@
+.profile-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f6fa 0%, #eef1f8 100%);
+  padding: 48rpx 36rpx 64rpx;
+  box-sizing: border-box;
+}
+
+.profile-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 32rpx 36rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 12rpx 36rpx rgba(15, 41, 104, 0.05);
+}
+
+.profile-card-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2a44;
+  margin-bottom: 28rpx;
+}
+
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  background: #f7f9fc;
+}
+
+.profile-info-label {
+  font-size: 26rpx;
+  color: #6b7385;
+}
+
+.profile-info-value {
+  font-size: 28rpx;
+  color: #222d42;
+  font-weight: 500;
+  max-width: 60%;
+  text-align: right;
+  word-break: break-all;
+}
+
+.profile-footer {
+  padding: 24rpx 0 0;
+}
+
+.profile-logout-button {
+  width: 100%;
+  background: linear-gradient(135deg, #1b9aee 0%, #37c0ff 100%) !important;
+  border: none;
+  border-radius: 999rpx !important;
+  color: #ffffff !important;
+  font-size: 30rpx !important;
+  height: 88rpx;
+  line-height: 88rpx !important;
+}
+
+.profile-action-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 32rpx 36rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 12rpx 36rpx rgba(15, 41, 104, 0.05);
+}
+
+.profile-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.profile-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 16rpx;
+  border-radius: 20rpx;
+  background: #f7f9fc;
+  transition: transform 0.2s ease;
+}
+
+.profile-action-item:active {
+  transform: scale(0.98);
+}
+
+.profile-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.profile-action-title {
+  font-size: 30rpx;
+  color: #1f2a44;
+  font-weight: 600;
+}
+
+.profile-action-desc {
+  font-size: 24rpx;
+  color: #768398;
+}
+
+.profile-action-arrow {
+  font-size: 40rpx;
+  color: #bcc4d4;
+  line-height: 1;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.profile-field-label {
+  font-size: 26rpx;
+  color: #58627a;
+}
+
+.profile-field-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 92rpx;
+  padding: 0 28rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, #f6f8fc 0%, #eef2fb 100%);
+  border: 1px solid #d9e2f5;
+  box-shadow: inset 0 4rpx 8rpx rgba(15, 41, 104, 0.05);
+  box-sizing: border-box;
+}
+
+.profile-field-native {
+  flex: 1;
+  font-size: 28rpx;
+  color: #222d42;
+}
+
+.profile-field-native::placeholder {
+  color: #a9b4c8;
+}
+
+.profile-modal-tip {
+  font-size: 24rpx;
+  color: #a0a7b5;
+  margin-top: 8rpx;
+}
+
+.profile-popup-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.profile-popup {
+  width: 100%;
+  max-width: 640rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  box-shadow: 0 24rpx 48rpx rgba(15, 41, 104, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1px solid #eef1f8;
+}
+
+.profile-popup-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222d42;
+}
+
+.profile-popup-close {
+  font-size: 40rpx;
+  color: #9aa4b8;
+  padding: 0 8rpx;
+}
+
+.profile-popup-body {
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.profile-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24rpx;
+  padding: 24rpx 32rpx 32rpx;
+}
+
+.profile-popup-btn {
+  font-size: 28rpx;
+  color: #5b6580;
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: #eef1f8;
+}
+
+.profile-popup-btn.primary {
+  background: linear-gradient(135deg, #1b9aee 0%, #37c0ff 100%);
+  color: #ffffff;
+}

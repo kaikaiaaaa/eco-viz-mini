@@ -24,7 +24,7 @@ var config = {
   },
   // 微信小程序配置
   weapp: {
-    appId: 'wxa250ac138790e179'
+    appId: 'wxad0bc6972754b77c'
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (config);
@@ -90,6 +90,20 @@ var api = {
   getUserInfo: function getUserInfo() {
     return request('/api/mini/my-account');
   },
+  // 更新个人信息
+  updateProfile: function updateProfile(data) {
+    return request('/api/mini/my-account/update-profile', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+  // 修改密码
+  changePassword: function changePassword(data) {
+    return request('/api/mini/my-account/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
   // 小程序：获取分组（当前用户可见）
   getMiniGroups: function getMiniGroups() {
     return request('/api/mini/groups');
@@ -138,6 +152,52 @@ var api = {
   getDeviceData: function getDeviceData(id, params) {
     var queryString = params ? "?".concat(new URLSearchParams(params).toString()) : '';
     return request("/api/devices/".concat(id, "/et-data").concat(queryString));
+  },
+  // 小程序：获取设备阈值配置
+  getDeviceThresholds: function getDeviceThresholds(deviceSn) {
+    return request("/api/mini/devices/".concat(encodeURIComponent(deviceSn), "/thresholds"));
+  },
+  // 小程序：创建或更新设备阈值配置
+  saveDeviceThreshold: function saveDeviceThreshold(deviceSn, data) {
+    return request("/api/mini/devices/".concat(encodeURIComponent(deviceSn), "/thresholds"), {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+  // 小程序：删除设备阈值配置
+  deleteDeviceThreshold: function deleteDeviceThreshold(deviceSn, thresholdId) {
+    var query = new URLSearchParams();
+    query.set('id', String(thresholdId));
+    return request("/api/mini/devices/".concat(encodeURIComponent(deviceSn), "/thresholds?").concat(query.toString()), {
+      method: 'DELETE'
+    });
+  },
+  // 小程序：获取消息列表
+  getMessages: function getMessages(params) {
+    var query = new URLSearchParams();
+    if (params !== null && params !== void 0 && params.page) query.set('page', String(params.page));
+    if (params !== null && params !== void 0 && params.pageSize) query.set('pageSize', String(params.pageSize));
+    if (params !== null && params !== void 0 && params.isRead) query.set('isRead', params.isRead);
+    var qs = query.toString() ? "?".concat(query.toString()) : '';
+    return request("/api/mini/messages".concat(qs));
+  },
+  // 小程序：标记消息为已读
+  markMessageRead: function markMessageRead(messageId) {
+    return request("/api/mini/messages/".concat(messageId, "/read"), {
+      method: 'PUT'
+    });
+  },
+  // 小程序：删除消息
+  deleteMessage: function deleteMessage(messageId) {
+    return request("/api/mini/messages/".concat(messageId), {
+      method: 'DELETE'
+    });
+  },
+  // 小程序：一键标记所有消息为已读
+  markAllMessagesRead: function markAllMessagesRead() {
+    return request('/api/mini/messages/read-all', {
+      method: 'PUT'
+    });
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (api);
@@ -591,46 +651,6 @@ var getAuthHeaders = function getAuthHeaders() {
   clearLoginData: clearLoginData,
   getAuthHeaders: getAuthHeaders
 });
-
-/***/ }),
-
-/***/ "./src/assets/images/icon-qx.png":
-/*!***************************************!*\
-  !*** ./src/assets/images/icon-qx.png ***!
-  \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "assets/images/icon-qx.png";
-
-/***/ }),
-
-/***/ "./src/assets/images/icon-sq.png":
-/*!***************************************!*\
-  !*** ./src/assets/images/icon-sq.png ***!
-  \***************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "assets/images/icon-sq.png";
-
-/***/ }),
-
-/***/ "./src/assets/images/icon-tianqiqxz.png":
-/*!**********************************************!*\
-  !*** ./src/assets/images/icon-tianqiqxz.png ***!
-  \**********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "assets/images/icon-tianqiqxz.png";
-
-/***/ }),
-
-/***/ "./src/assets/images/icon-zhishang.png":
-/*!*********************************************!*\
-  !*** ./src/assets/images/icon-zhishang.png ***!
-  \*********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "assets/images/icon-zhishang.png";
 
 /***/ })
 

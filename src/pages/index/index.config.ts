@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: 'eco-viz',
+  navigationBarTitleText: '农业物联',
 });
 
 

@@ -1,5 +1,5 @@
 {
-  "miniprogramRoot": "",
+  "miniprogramRoot": "./",
   "projectname": "eco-viz-mini",
   "description": "eco-viz 微信小程序",
   "appid": "wxad4bf04718ee7738",
@@ -8,22 +8,9 @@
     "es6": true,
     "postcss": true,
     "minified": true,
-    "enhance": true,
-    "babelSetting": {
-      "ignore": [],
-      "disablePlugins": [],
-      "outputPath": ""
-    }
+    "enhance": true
   },
   "compileType": "miniprogram",
   "libVersion": "latest",
-  "condition": {},
-  "packOptions": {
-    "ignore": [],
-    "include": []
-  },
-  "editorSetting": {
-    "tabIndent": "insertSpaces",
-    "tabSize": 2
-  }
+  "condition": {}
 }

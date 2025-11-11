@@ -1,0 +1,42 @@
+.message-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.message-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.message-empty {
+  min-height: 420rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  background: #f5f5f5;
+}
+
+.message-pane-loading {
+  min-height: 420rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f5f5f5;
+}
+
+.message-empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  opacity: 0.85;
+}
+
+.message-empty-text {
+  font-size: 30rpx;
+  color: #999999;
+}
+

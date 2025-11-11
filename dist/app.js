@@ -1,17 +1,9 @@
 "use strict";
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_echarts_charts_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_echarts_components_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-Y7W53HAY_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-P33EMSZG_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-QXYCLUKZ_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_taro-ui_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_react-dom_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-IWKKQYBA_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_echarts_renderers_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-IQGBDCAJ_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_chunk-CDP6MKZV_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_tarojs_plugin-framework-react_dist_runtime_js.js");
-require("./prebundle/vendors-node_modules_taro_weapp_prebundle_echarts_core_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_dayjs_js.js");
 require("./prebundle/vendors-node_modules_taro_weapp_prebundle_tarojs_plugin-platform-weapp_dist_runtime_js.js");
 require("./prebundle/node_modules_taro_weapp_prebundle_tarojs_runtime_js.js");
@@ -80,7 +72,7 @@ function App(props) {
 
 
 
-var config = {"pages":["pages/home/index","pages/message/index","pages/profile/index","pages/webview/index","pages/device-detail/index","pages/index/index"],"window":{"backgroundTextStyle":"light","navigationBarBackgroundColor":"#ffffff","navigationBarTitleText":"eco-viz","navigationBarTextStyle":"black"},"tabBar":{"color":"#888","selectedColor":"#1B9AEE","backgroundColor":"#fff","borderStyle":"black","list":[{"pagePath":"pages/home/index","text":"首页"},{"pagePath":"pages/message/index","text":"消息"},{"pagePath":"pages/profile/index","text":"我的"}]},"style":"v2","lazyCodeLoading":"requiredComponents"};
+var config = {"pages":["pages/home/index","pages/message/index","pages/profile/index","pages/webview/index","pages/device-detail/index","pages/device-threshold-edit/index","pages/index/index"],"window":{"backgroundTextStyle":"light","navigationBarBackgroundColor":"#ffffff","navigationBarTitleText":"eco-viz","navigationBarTextStyle":"black"},"tabBar":{"color":"#888","selectedColor":"#1B9AEE","backgroundColor":"#fff","borderStyle":"black","list":[{"pagePath":"pages/home/index","text":"首页","iconPath":"assets/images/icon-home.png","selectedIconPath":"assets/images/icon-home.png"},{"pagePath":"pages/message/index","text":"消息","iconPath":"assets/images/icon-message.png","selectedIconPath":"assets/images/icon-message.png"},{"pagePath":"pages/profile/index","text":"我的","iconPath":"assets/images/icon-user.png","selectedIconPath":"assets/images/icon-user.png"}]},"style":"v2","lazyCodeLoading":"requiredComponents"};
 _tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__.window.__taroAppConfig = config
 var inst = App((0,_tarojs_plugin_framework_react_dist_runtime__WEBPACK_IMPORTED_MODULE_2__.createReactApp)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_app_app_tsx__WEBPACK_IMPORTED_MODULE_4__["default"], react__WEBPACK_IMPORTED_MODULE_5__, (react_dom__WEBPACK_IMPORTED_MODULE_6___default()), config))
 

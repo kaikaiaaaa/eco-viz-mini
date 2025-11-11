@@ -20,7 +20,7 @@
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -200,19 +200,13 @@
 /******/ 				"webpack/container/remote/@tarojs/plugin-framework-react/dist/runtime",
 /******/ 				"webpack/container/remote/react-dom"
 /******/ 			],
-/******/ 			"pages/device-detail/index": [
-/******/ 				"webpack/container/remote/echarts/core",
-/******/ 				"webpack/container/remote/echarts/charts",
-/******/ 				"webpack/container/remote/echarts/components",
-/******/ 				"webpack/container/remote/echarts/renderers",
-/******/ 				"webpack/container/remote/dayjs"
-/******/ 			],
 /******/ 			"common": [
 /******/ 				"webpack/container/remote/@tarojs/runtime",
 /******/ 				"webpack/container/remote/@tarojs/taro",
 /******/ 				"webpack/container/remote/react",
 /******/ 				"webpack/container/remote/taro-ui",
-/******/ 				"webpack/container/remote/react/jsx-runtime"
+/******/ 				"webpack/container/remote/react/jsx-runtime",
+/******/ 				"webpack/container/remote/dayjs"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
@@ -229,31 +223,6 @@
 /******/ 			"webpack/container/remote/react-dom": [
 /******/ 				"default",
 /******/ 				"./react-dom",
-/******/ 				null
-/******/ 			],
-/******/ 			"webpack/container/remote/echarts/core": [
-/******/ 				"default",
-/******/ 				"./echarts/core",
-/******/ 				null
-/******/ 			],
-/******/ 			"webpack/container/remote/echarts/charts": [
-/******/ 				"default",
-/******/ 				"./echarts/charts",
-/******/ 				null
-/******/ 			],
-/******/ 			"webpack/container/remote/echarts/components": [
-/******/ 				"default",
-/******/ 				"./echarts/components",
-/******/ 				null
-/******/ 			],
-/******/ 			"webpack/container/remote/echarts/renderers": [
-/******/ 				"default",
-/******/ 				"./echarts/renderers",
-/******/ 				null
-/******/ 			],
-/******/ 			"webpack/container/remote/dayjs": [
-/******/ 				"default",
-/******/ 				"./dayjs",
 /******/ 				null
 /******/ 			],
 /******/ 			"webpack/container/remote/@tarojs/runtime": [
@@ -279,6 +248,11 @@
 /******/ 			"webpack/container/remote/react/jsx-runtime": [
 /******/ 				"default",
 /******/ 				"./react/jsx-runtime",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/dayjs": [
+/******/ 				"default",
+/******/ 				"./dayjs",
 /******/ 				null
 /******/ 			]
 /******/ 		};

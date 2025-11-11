@@ -5,12 +5,13 @@ export default defineAppConfig({
     'pages/profile/index',
     'pages/webview/index',
     'pages/device-detail/index',
+    'pages/device-threshold-edit/index',
     'pages/index/index'
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#ffffff',
-    navigationBarTitleText: 'eco-viz',
+    navigationBarTitleText: '农业物联',
     navigationBarTextStyle: 'black'
   },
   tabBar: {
