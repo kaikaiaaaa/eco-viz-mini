@@ -27,10 +27,10 @@ export default function IndexPage() {
       
       if (loginResult.isLoggedIn) {
         // 已登录，跳转到首页
-        Taro.redirectTo({ 
+        Taro.switchTab({ 
           url: '/pages/home/index',
           fail: () => {
-            // 如果 redirectTo 失败，使用 reLaunch
+            // 如果 switchTab 失败，使用 reLaunch
             Taro.reLaunch({ url: '/pages/home/index' })
           }
         })

@@ -240,12 +240,12 @@ export default function MessagePage() {
             getNodeText={getNodeText}
             onNavigate={handleNavigateToDevice}
           />
-          {loadingMore && (
+          {loadingMore && hasMore && (
             <View style={{display:'flex',justifyContent:'center',padding:'16px 0'}}>
               <AtActivityIndicator content='加载更多...' size={26} color='#3192ff' />
             </View>
           )}
-          {!hasMore && messages.length > 0 && (
+          {!hasMore && !loadingMore && messages.length > 0 && (
             <View style={{textAlign:'center',fontSize:'14px',color:'#aaa',margin:'20px 0'}}>没有更多了</View>
           )}
         </AtTabsPane>
@@ -262,12 +262,12 @@ export default function MessagePage() {
             getNodeText={getNodeText}
             onNavigate={handleNavigateToDevice}
           />
-          {loadingMore && (
+          {loadingMore && hasMore && (
             <View style={{display:'flex',justifyContent:'center',padding:'16px 0'}}>
               <AtActivityIndicator content='加载更多...' size={26} color='#3192ff' />
             </View>
           )}
-          {!hasMore && messages.filter(m => !m.isRead).length > 0 && (
+          {!hasMore && !loadingMore && messages.filter(m => !m.isRead).length > 0 && (
             <View style={{textAlign:'center',fontSize:'14px',color:'#aaa',margin:'20px 0'}}>没有更多了</View>
           )}
         </AtTabsPane>
@@ -284,12 +284,12 @@ export default function MessagePage() {
             getNodeText={getNodeText}
             onNavigate={handleNavigateToDevice}
           />
-          {loadingMore && (
+          {loadingMore && hasMore && (
             <View style={{display:'flex',justifyContent:'center',padding:'16px 0'}}>
               <AtActivityIndicator content='加载更多...' size={26} color='#3192ff' />
             </View>
           )}
-          {!hasMore && messages.filter(m => m.isRead).length > 0 && (
+          {!hasMore && !loadingMore && messages.filter(m => m.isRead).length > 0 && (
             <View style={{textAlign:'center',fontSize:'14px',color:'#aaa',margin:'20px 0'}}>没有更多了</View>
           )}
         </AtTabsPane>

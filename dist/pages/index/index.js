@@ -64,10 +64,10 @@ function IndexPage() {
               break;
             }
             // 已登录，跳转到首页
-            _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().redirectTo({
+            _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().switchTab({
               url: '/pages/home/index',
               fail: function fail() {
-                // 如果 redirectTo 失败，使用 reLaunch
+                // 如果 switchTab 失败，使用 reLaunch
                 _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().reLaunch({
                   url: '/pages/home/index'
                 });
@@ -138,7 +138,7 @@ function IndexPage() {
 /* harmony import */ var _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_index_index_index_tsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/index/index!./index.tsx */ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/index/index!./src/pages/index/index.tsx");
 
 
-var config = {"navigationBarTitleText":"eco-viz"};
+var config = {"navigationBarTitleText":"农业物联"};
 
 
 var inst = Page((0,_tarojs_runtime__WEBPACK_IMPORTED_MODULE_0__.createPageConfig)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_index_index_index_tsx__WEBPACK_IMPORTED_MODULE_1__["default"], 'pages/index/index', {root:{cn:[]}}, config || {}))

@@ -521,10 +521,10 @@ var handleLoginSuccess = /*#__PURE__*/function () {
 
           // 跳转到首页
           setTimeout(function () {
-            _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().redirectTo({
+            _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().switchTab({
               url: '/pages/home/index',
               fail: function fail() {
-                // 如果 redirectTo 失败，使用 reLaunch
+                // 如果 switchTab 失败，使用 reLaunch
                 _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().reLaunch({
                   url: '/pages/home/index'
                 });

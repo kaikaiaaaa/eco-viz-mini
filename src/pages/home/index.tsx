@@ -8,8 +8,6 @@ import { navigateToWebViewLoginSimple, getAuthHeaders } from '../../utils/auth'
 import 'taro-ui/dist/style/index.scss'
 import './index.scss'
 
-let redirectingToLogin = false
-
 // 导入设备图标
 const iconSq = require('../../assets/images/icon-sq.png')
 const iconQx = require('../../assets/images/icon-qx.png')
@@ -126,6 +124,7 @@ export default function HomePage() {
   const searchReloadingRef = useRef(false) // 防止搜索重新加载的重复触发
   const prevSearchKeywordRef = useRef('') // 跟踪上一次的搜索关键词
   const prevDeviceTypeFilterRef = useRef('all') // 跟踪上一次的设备类型筛选
+  const redirectingToLoginRef = useRef(false)
 
   const updateTabBarBadge = useCallback((count: number) => {
     try {
@@ -191,6 +190,7 @@ export default function HomePage() {
 
   Taro.useDidShow(() => {
     refreshUnreadMessageBadge()
+    loadUserInfo()
   })
   
   useEffect(() => {
@@ -206,8 +206,8 @@ export default function HomePage() {
       const loginTimestamp = Taro.getStorageSync('login_timestamp')
       const expiresIn = Taro.getStorageSync('token_expires_in')
       if (!accessToken || !loginTimestamp || !expiresIn) {
-        if (!redirectingToLogin) {
-          redirectingToLogin = true
+        if (!redirectingToLoginRef.current) {
+          redirectingToLoginRef.current = true
           await navigateToWebViewLoginSimple()
         }
         return
@@ -216,13 +216,13 @@ export default function HomePage() {
       const tokenAge = now - loginTimestamp
       const maxAge = expiresIn * 1000
       if (tokenAge > maxAge) {
-        if (!redirectingToLogin) {
-          redirectingToLogin = true
+        if (!redirectingToLoginRef.current) {
+          redirectingToLoginRef.current = true
           await navigateToWebViewLoginSimple()
         }
         return
       }
-      redirectingToLogin = false
+      redirectingToLoginRef.current = false
       const cachedUser = Taro.getStorageSync('user_info')
       if (cachedUser) setUserInfo(cachedUser)
       setLoading(false)
@@ -486,7 +486,6 @@ export default function HomePage() {
   const tabsCustomStyle = useMemo(() => {
     return {
       '--home-tabs-offset': `${headerHeight}px`,
-      background: '#fff'
     } as CSSProperties
   }, [headerHeight])
   
@@ -562,7 +561,7 @@ export default function HomePage() {
             const paneKey = String(group.id)
             const paneState = listsByGroup[paneKey] || { list: [], loading: false, hasMore: true, page: 0 }
             return (
-              <AtTabsPane current={tabIdx} index={idx} key={group.id} customStyle={{ background: '#f8fafe', padding: 0 }}>
+              <AtTabsPane current={tabIdx} index={idx} key={group.id} customStyle={{ padding: 0 }}>
                 {paneState.loading && paneState.list.length === 0 ? (
                   <View className='home-pane-loading'>
                     <AtActivityIndicator mode='normal' size={40} content='加载设备列表...' color='#1B9AEE' />

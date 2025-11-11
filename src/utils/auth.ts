@@ -253,10 +253,10 @@ export const handleLoginSuccess = async (tempToken: string) => {
 
     // 跳转到首页
     setTimeout(() => {
-      Taro.redirectTo({ 
+      Taro.switchTab({
         url: '/pages/home/index',
         fail: () => {
-          // 如果 redirectTo 失败，使用 reLaunch
+          // 如果 switchTab 失败，使用 reLaunch
           Taro.reLaunch({ url: '/pages/home/index' })
         }
       })

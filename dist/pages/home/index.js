@@ -41,9 +41,8 @@
 
 
 
-var redirectingToLogin = false;
-
 // 导入设备图标
+
 var iconSq = __webpack_require__(/*! ../../assets/images/icon-sq.png */ "./src/assets/images/icon-sq.png");
 var iconQx = __webpack_require__(/*! ../../assets/images/icon-qx.png */ "./src/assets/images/icon-qx.png");
 var iconZhishang = __webpack_require__(/*! ../../assets/images/icon-zhishang.png */ "./src/assets/images/icon-zhishang.png");
@@ -214,7 +213,7 @@ function HomePage() {
   var searchReloadingRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false); // 防止搜索重新加载的重复触发
   var prevSearchKeywordRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(''); // 跟踪上一次的搜索关键词
   var prevDeviceTypeFilterRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)('all'); // 跟踪上一次的设备类型筛选
-
+  var redirectingToLoginRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
   var updateTabBarBadge = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (count) {
     try {
       if (count > 0) {
@@ -290,6 +289,7 @@ function HomePage() {
   }, [loading]);
   _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().useDidShow(function () {
     refreshUnreadMessageBadge();
+    loadUserInfo();
   });
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (!loading && !initGroupsCalledRef.current) {
@@ -311,11 +311,11 @@ function HomePage() {
               _context2.n = 2;
               break;
             }
-            if (redirectingToLogin) {
+            if (redirectingToLoginRef.current) {
               _context2.n = 1;
               break;
             }
-            redirectingToLogin = true;
+            redirectingToLoginRef.current = true;
             _context2.n = 1;
             return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.navigateToWebViewLoginSimple)();
           case 1:
@@ -328,17 +328,17 @@ function HomePage() {
               _context2.n = 4;
               break;
             }
-            if (redirectingToLogin) {
+            if (redirectingToLoginRef.current) {
               _context2.n = 3;
               break;
             }
-            redirectingToLogin = true;
+            redirectingToLoginRef.current = true;
             _context2.n = 3;
             return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.navigateToWebViewLoginSimple)();
           case 3:
             return _context2.a(2);
           case 4:
-            redirectingToLogin = false;
+            redirectingToLoginRef.current = false;
             cachedUser = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('user_info');
             if (cachedUser) setUserInfo(cachedUser);
             setLoading(false);
@@ -740,8 +740,7 @@ function HomePage() {
   }, [groups]);
   var tabsCustomStyle = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
     return {
-      '--home-tabs-offset': "".concat(headerHeight, "px"),
-      background: '#fff'
+      '--home-tabs-offset': "".concat(headerHeight, "px")
     };
   }, [headerHeight]);
   if (loading || groupsLoading) {
@@ -831,7 +830,6 @@ function HomePage() {
             current: tabIdx,
             index: idx,
             customStyle: {
-              background: '#f8fafe',
               padding: 0
             },
             children: [paneState.loading && paneState.list.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {

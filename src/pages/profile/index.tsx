@@ -216,9 +216,9 @@ export default function ProfilePage() {
         if (res.confirm) {
           clearLoginData()
           Taro.atMessage({ message: '已退出登录', type: 'info' })
-          setTimeout(() => { 
-            Taro.redirectTo({ url: '/pages/home/index' })
-          }, 1500)
+          setTimeout(() => {
+            navigateToWebViewLoginSimple()
+          }, 300)
         }
       }
     })
