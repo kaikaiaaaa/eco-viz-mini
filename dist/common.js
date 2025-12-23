@@ -9,18 +9,28 @@
 
 /* unused harmony export config */
 // 小程序环境配置
+var ENV = 'dev';
+var apiBaseUrls = {
+  dev: 'http://192.168.199.61:3000',
+  prod: 'https://ynsq.eboard.apps.aigrohub.com'
+};
+var logtoRedirectUris = {
+  dev: 'http://192.168.199.61:3000/api/auth/mini-callback',
+  prod: 'https://ynsq.eboard.apps.aigrohub.com/api/auth/mini-callback'
+};
 var config = {
-  // API 配置 - 强制使用开发环境
+  env: ENV,
+  // API 配置
   api: {
-    baseUrl: 'http://192.168.199.153:3000' // 强制使用开发环境URL
+    baseUrl: apiBaseUrls[ENV]
   },
   // Logto 配置 - 使用新创建的小程序应用
   logto: {
     endpoint: 'https://login.eboard.apps.aigrohub.com',
-    appId: 'avmoloeby2yvj8bi6mwse',
+    appId: 'ctvdqppb8we5z1yz41qfg',
     // 使用环境变量中的 App ID
     apiResource: 'https://ynsq.eboard.apps.aigrohub.com/api',
-    redirectUri: 'http://192.168.199.153:3000/api/auth/mini-callback' // 使用后端API回调
+    redirectUri: logtoRedirectUris[ENV] // 使用后端API回调
   },
   // 微信小程序配置
   weapp: {
@@ -198,6 +208,18 @@ var api = {
     return request('/api/mini/messages/read-all', {
       method: 'PUT'
     });
+  },
+  // 获取墒情设备指标数据（最新分析）
+  getMoistureIndicators: function getMoistureIndicators(deviceId, parameters) {
+    var params = new URLSearchParams();
+    params.set('parameters', parameters.join(','));
+    return request("/api/devices/".concat(deviceId, "/moisture-indicators?").concat(params.toString()));
+  },
+  // 获取气象设备指标数据（最新分析）
+  getWeatherIndicators: function getWeatherIndicators(deviceId, parameters) {
+    var params = new URLSearchParams();
+    params.set('parameters', parameters.join(','));
+    return request("/api/devices/".concat(deviceId, "/analysis?type=weather&").concat(params.toString()));
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (api);

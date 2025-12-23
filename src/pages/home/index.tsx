@@ -38,9 +38,9 @@ const getDeviceIcon = (connectorIdentifier: string, deviceType: string) => {
   return icon ? icon.icon : null
 }
 
-const getDeviceStatusInfo = (statusCode?: string | null): { label: string; color: string } => {
+const getDeviceStatusInfo = (statusCode?: string | null): { label: string; color: string } | null => {
   if (!statusCode) {
-    return { label: '未知', color: '#fa607e' }
+    return null
   }
   const status = deviceStatusList.find(item => item.value === statusCode)
   return status || { label: '未知', color: '#fa607e' }
@@ -419,11 +419,8 @@ export default function HomePage() {
     // 直接使用groups，因为useCallback会在groups变化时重新创建
     if (groups[idx]) {
       const gid = groups[idx].id
-      const key = String(gid)
-      const currentLists = listsByGroupRef.current
-      if (!currentLists[key] || currentLists[key].list.length === 0) {
-        await loadDevices(gid, true)
-      }
+      // 切换tab时总是重新加载，确保应用当前的筛选条件（搜索关键词和设备类型）
+      await loadDevices(gid, true)
     }
   }, [groups, loadDevices])
   
@@ -593,12 +590,14 @@ export default function HomePage() {
                                 mode='aspectFit'
                               />
                             )}
-                            <Text
-                              className='home-device-status-badge'
-                              style={{ backgroundColor: statusInfo.color }}
-                            >
-                              {statusInfo.label}
-                            </Text>
+                            {statusInfo && (
+                              <Text
+                                className='home-device-status-badge'
+                                style={{ backgroundColor: statusInfo.color }}
+                              >
+                                {statusInfo.label}
+                              </Text>
+                            )}
                           </View>
                           <View className='home-device-info'>
                             <View>

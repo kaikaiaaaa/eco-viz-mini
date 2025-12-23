@@ -5,6 +5,7 @@ import Taro from '@tarojs/taro'
 import api from '../../utils/api'
 import { getAuthHeaders } from '../../utils/auth'
 import EcCanvas from '../../components/chart/ec-canvas'
+import { getIndicatorParameters, getIndicatorMapping } from '../../utils/indicators-mapping'
 import 'taro-ui/dist/style/index.scss'
 import './index.scss'
 import dayjs from 'dayjs'
@@ -24,10 +25,15 @@ const getParametersByDeviceType = (deviceType: string): string[] => {
   return []
 }
 
+type TabType = 'analysis' | 'history'
+
 export default function DeviceDetailPage() {
   const [deviceId, setDeviceId] = useState<number | null>(null)
   const [device, setDevice] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<TabType>('analysis')
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [analysisData, setAnalysisData] = useState<any[]>([])
   const [chartLoading, setChartLoading] = useState(false)
   const [parameters, setParameters] = useState<any[]>([])
   const [selectedParameter, setSelectedParameter] = useState<string>('')
@@ -132,8 +138,10 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
       const resp: any = await api.getDeviceDetail(id)
       if (resp?.code === 0) {
         setDevice(resp.data)
-        // 加载设备参数列表
+        // 加载设备参数列表（用于历史数据）
         await loadDeviceParameters(id, resp.data.deviceType)
+        // 加载最新分析数据
+        await loadAnalysisData(id, resp.data.deviceType)
       } else {
         Taro.atMessage({ message: resp.message || '获取设备详情失败', type: 'error' })
       }
@@ -141,6 +149,106 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
       Taro.atMessage({ message: '获取设备详情失败', type: 'error' })
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 加载最新分析数据
+  const loadAnalysisData = async (id: number, deviceType: string) => {
+    // 只支持墒情设备和气象设备
+    if (deviceType !== '1' && deviceType !== '2') {
+      return
+    }
+
+    try {
+      setAnalysisLoading(true)
+      const indicatorParameters = getIndicatorParameters(deviceType)
+      const mapping = getIndicatorMapping(deviceType)
+
+      if (indicatorParameters.length === 0 || mapping.length === 0) {
+        return
+      }
+
+      let response: any
+      if (deviceType === '1') {
+        // 墒情设备
+        response = await api.getMoistureIndicators(id, indicatorParameters)
+      } else {
+        // 气象设备
+        response = await api.getWeatherIndicators(id, indicatorParameters)
+      }
+
+      if (response?.code === 0) {
+        const data = deviceType === '1' ? response.data : response.data?.weather
+        const formattedData = indicatorParameters.map(parameter => {
+          const map = mapping.find(m => m.parameter === parameter)
+          if (!map) return null
+
+          let value: string
+          const rawValue = data?.[parameter]
+
+          // 处理布尔值：布尔值即使是 false 也应该显示
+          if (typeof rawValue === 'boolean') {
+            if (map.transform) {
+              value = map.transform(rawValue)
+            } else {
+              value = rawValue ? '是' : '否'
+            }
+          } else if (rawValue !== null && rawValue !== undefined && rawValue !== 0) {
+            // 如果有转换函数，使用转换函数
+            if (map.transform) {
+              value = map.transform(rawValue)
+            } else {
+              // 处理数值，保留两位小数
+              if (typeof rawValue === 'number' || !isNaN(parseFloat(rawValue))) {
+                const numValue = parseFloat(rawValue.toString())
+                const truncatedValue = Math.floor(numValue * 100) / 100
+                value = truncatedValue.toFixed(2)
+              } else {
+                value = rawValue.toString()
+              }
+            }
+          } else {
+            value = '--'
+          }
+
+          return {
+            label: map.name,
+            value: value,
+            unit: map.unit || ''
+          }
+        }).filter((item): item is { label: string; value: string; unit: string } => item !== null)
+
+        setAnalysisData(formattedData)
+      } else {
+        // API 失败时显示默认数据
+        const defaultData = indicatorParameters.map(parameter => {
+          const map = mapping.find(m => m.parameter === parameter)
+          if (!map) return null
+          return {
+            label: map.name,
+            value: '--',
+            unit: map.unit || ''
+          }
+        }).filter((item): item is { label: string; value: string; unit: string } => item !== null)
+        setAnalysisData(defaultData)
+      }
+    } catch (e: any) {
+      console.error('获取最新分析数据失败:', e)
+      // 出错时显示默认数据
+      const indicatorParameters = getIndicatorParameters(deviceType)
+      const mapping = getIndicatorMapping(deviceType)
+      const defaultData = indicatorParameters.map(parameter => {
+        const map = mapping.find(m => m.parameter === parameter)
+        if (!map) return null
+        return {
+          label: map.name,
+          value: '--',
+          unit: map.unit || ''
+        }
+      }).filter((item): item is { label: string; value: string; unit: string } => item !== null)
+      setAnalysisData(defaultData)
+    } finally {
+      setAnalysisLoading(false)
     }
   }
 
@@ -583,7 +691,7 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
           </View>
         </View>
 
-        {/* 设备数据图表 */}
+        {/* Tab 切换和设备数据 */}
         <View style={{
           background:'#fff',
           margin:'16px',
@@ -591,24 +699,95 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
           overflow:'hidden',
           boxShadow:'0 2px 8px rgba(0,0,0,0.08)'
         }}>
+          {/* Tab 切换 */}
           <View style={{
-            padding:'16px 20px',
-            borderBottom:'1px solid #f0f0f0',
             display:'flex',
-            alignItems:'center'
+            borderBottom:'1px solid #f0f0f0'
           }}>
-            <View style={{
-              width:'4px',
-              height:'16px',
-              background:'#1B9AEE',
-              marginRight:'8px',
-              borderRadius:'2px'
-            }}></View>
-            <Text style={{fontSize:'16px',fontWeight:600,color:'#222'}}>设备数据</Text>
+            <View
+              onClick={() => setActiveTab('analysis')}
+              style={{
+                flex:1,
+                padding:'16px 20px',
+                textAlign:'center',
+                borderBottom: activeTab === 'analysis' ? '2px solid #1B9AEE' : '2px solid transparent',
+                background: activeTab === 'analysis' ? '#f8f9fa' : 'transparent'
+              }}
+            >
+              <Text style={{
+                fontSize:'16px',
+                fontWeight: activeTab === 'analysis' ? 600 : 400,
+                color: activeTab === 'analysis' ? '#1B9AEE' : '#666'
+              }}>最新分析</Text>
+            </View>
+            <View
+              onClick={() => setActiveTab('history')}
+              style={{
+                flex:1,
+                padding:'16px 20px',
+                textAlign:'center',
+                borderBottom: activeTab === 'history' ? '2px solid #1B9AEE' : '2px solid transparent',
+                background: activeTab === 'history' ? '#f8f9fa' : 'transparent'
+              }}
+            >
+              <Text style={{
+                fontSize:'16px',
+                fontWeight: activeTab === 'history' ? 600 : 400,
+                color: activeTab === 'history' ? '#1B9AEE' : '#666'
+              }}>历史数据</Text>
+            </View>
           </View>
 
-          <View style={{padding:'20px'}}>
-            {/* 参数选择 */}
+          {/* 最新分析内容 */}
+          {activeTab === 'analysis' && (
+            <View style={{padding:'20px'}}>
+              {analysisLoading ? (
+                <View style={{
+                  display:'flex',
+                  justifyContent:'center',
+                  alignItems:'center',
+                  minHeight:'200px'
+                }}>
+                  <AtActivityIndicator mode='normal' size={30} content='加载中...' color='#1B9AEE' />
+                </View>
+              ) : (
+                <View>
+                  {analysisData.length > 0 ? (
+                    <View className='analysis-grid'>
+                      {analysisData.map((item, index) => (
+                        <View
+                          key={index}
+                          className='analysis-card'
+                        >
+                          <View className='analysis-value-wrapper'>
+                            <Text className='analysis-value'>{item.value}</Text>
+                            {item.unit && (
+                              <Text className='analysis-unit'>{item.unit}</Text>
+                            )}
+                          </View>
+                          <Text className='analysis-label'>{item.label}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={{
+                      display:'flex',
+                      justifyContent:'center',
+                      alignItems:'center',
+                      minHeight:'200px'
+                    }}>
+                      <Text style={{fontSize:'14px',color:'#999'}}>暂无数据</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* 历史数据内容 */}
+          {activeTab === 'history' && (
+            <View style={{padding:'20px'}}>
+              {/* 参数选择 */}
             {parameters.length > 0 ? (
               <View style={{marginBottom:'16px'}}>
                 <Text style={{fontSize:'14px',color:'#666',marginBottom:'8px',display:'block'}}>参数:</Text>
@@ -702,7 +881,7 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
                     marginLeft: 'auto'
                   }}
                 >
-                  {chartLoading ? '查询中...' : '查询'}
+                  {chartLoading ? '查询' : '查询'}
                 </AtButton>
               </View>
             </View>
@@ -732,7 +911,8 @@ const updateDateRange = useCallback((type: 'start' | 'end', value: string) => {
                 </View>
               )}
             </View>
-          </View>
+            </View>
+          )}
         </View>
       </View>
     </View>

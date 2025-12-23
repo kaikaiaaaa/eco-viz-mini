@@ -158,6 +158,20 @@ export const api = {
     return request('/api/mini/messages/read-all', {
       method: 'PUT'
     })
+  },
+
+  // 获取墒情设备指标数据（最新分析）
+  getMoistureIndicators: (deviceId: number, parameters: string[]) => {
+    const params = new URLSearchParams()
+    params.set('parameters', parameters.join(','))
+    return request(`/api/devices/${deviceId}/moisture-indicators?${params.toString()}`)
+  },
+
+  // 获取气象设备指标数据（最新分析）
+  getWeatherIndicators: (deviceId: number, parameters: string[]) => {
+    const params = new URLSearchParams()
+    params.set('parameters', parameters.join(','))
+    return request(`/api/devices/${deviceId}/analysis?type=weather&${params.toString()}`)
   }
 }
 

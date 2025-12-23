@@ -88,10 +88,7 @@ var getDeviceIcon = function getDeviceIcon(connectorIdentifier, deviceType) {
 };
 var getDeviceStatusInfo = function getDeviceStatusInfo(statusCode) {
   if (!statusCode) {
-    return {
-      label: '未知',
-      color: '#fa607e'
-    };
+    return null;
   }
   var status = deviceStatusList.find(function (item) {
     return item.value === statusCode;
@@ -633,7 +630,7 @@ function HomePage() {
   }, [searchKeyword, deviceTypeFilter]); // 只依赖搜索相关的状态
   var onTabChange = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
     var _ref5 = (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_8__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().m(function _callee5(idx) {
-      var gid, key, currentLists;
+      var gid;
       return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().w(function (_context5) {
         while (1) switch (_context5.n) {
           case 0:
@@ -643,13 +640,7 @@ function HomePage() {
               _context5.n = 1;
               break;
             }
-            gid = groups[idx].id;
-            key = String(gid);
-            currentLists = listsByGroupRef.current;
-            if (!(!currentLists[key] || currentLists[key].list.length === 0)) {
-              _context5.n = 1;
-              break;
-            }
+            gid = groups[idx].id; // 切换tab时总是重新加载，确保应用当前的筛选条件（搜索关键词和设备类型）
             _context5.n = 1;
             return loadDevices(gid, true);
           case 1:
@@ -863,7 +854,7 @@ function HomePage() {
                       src: deviceIcon,
                       className: "home-device-icon",
                       mode: "aspectFit"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
+                    }), statusInfo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
                       className: "home-device-status-badge",
                       style: {
                         backgroundColor: statusInfo.color

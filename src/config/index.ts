@@ -1,16 +1,29 @@
 // 小程序环境配置
+const ENV: 'dev' | 'prod' = 'dev'
+
+const apiBaseUrls = {
+  dev: 'http://192.168.199.61:3000',
+  prod: 'https://ynsq.eboard.apps.aigrohub.com'
+} as const
+
+const logtoRedirectUris = {
+  dev: 'http://192.168.199.61:3000/api/auth/mini-callback',
+  prod: 'https://ynsq.eboard.apps.aigrohub.com/api/auth/mini-callback'
+} as const
+
 export const config = {
-  // API 配置 - 强制使用开发环境
+  env: ENV,
+  // API 配置
   api: {
-    baseUrl: 'http://192.168.199.153:3000' // 强制使用开发环境URL
+    baseUrl: apiBaseUrls[ENV]
   },
   
   // Logto 配置 - 使用新创建的小程序应用
   logto: {
     endpoint: 'https://login.eboard.apps.aigrohub.com',
-    appId: 'avmoloeby2yvj8bi6mwse', // 使用环境变量中的 App ID
+    appId: 'ctvdqppb8we5z1yz41qfg', // 使用环境变量中的 App ID
     apiResource: 'https://ynsq.eboard.apps.aigrohub.com/api',
-    redirectUri: 'http://192.168.199.153:3000/api/auth/mini-callback' // 使用后端API回调
+    redirectUri: logtoRedirectUris[ENV] // 使用后端API回调
   },
   
   // 微信小程序配置

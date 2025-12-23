@@ -248,12 +248,6 @@ export default function ProfilePage() {
     { label: '邮箱', value: userInfo?.primaryEmail || '--' }
   ]
 
-  const loginInfo = [
-    { label: '注册时间', value: formatDate(userInfo?.createdAt) },
-    { label: '最近修改时间', value: formatDate(userInfo?.updatedAt) },
-    { label: '最近登录时间', value: formatDate(userInfo?.lastSignInAt) }
-  ]
-
   if (loading) {
     return (
       <View className='profile-loading'>
@@ -295,18 +289,6 @@ export default function ProfilePage() {
             </View>
             <Text className='profile-action-arrow'>›</Text>
           </View>
-        </View>
-      </View>
-
-      <View className='profile-card'>
-        <Text className='profile-card-title'>登录管理</Text>
-        <View className='profile-info-list'>
-          {loginInfo.map((item) => (
-            <View className='profile-info-row' key={item.label}>
-              <Text className='profile-info-label'>{item.label}</Text>
-              <Text className='profile-info-value'>{item.value}</Text>
-            </View>
-          ))}
         </View>
       </View>
 
