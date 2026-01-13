@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import config from '../config'
-import { navigateToWebViewLoginSimple } from './auth'
+import { wechatSilentLogin } from './auth'
 
 // 请求拦截器
 const request = (url: string, options: RequestInit = {}) => {
@@ -18,9 +18,16 @@ const request = (url: string, options: RequestInit = {}) => {
       data: options.body ? JSON.parse(options.body as string) : undefined,
       success: (res) => {
         if (res.statusCode === 401) {
-          // Token 过期，清除本地存储并跳转登录
+          // Token 过期，清除本地存储并重新静默登录
           Taro.removeStorageSync('logto_token')
-          navigateToWebViewLoginSimple(); // 不能加await！
+          Taro.removeStorageSync('user_info')
+          Taro.removeStorageSync('user_id')
+          Taro.removeStorageSync('token_expires_in')
+          Taro.removeStorageSync('login_timestamp')
+          // 尝试重新静默登录
+          wechatSilentLogin().catch(() => {
+            Taro.showToast({ title: '登录已过期，请重新打开小程序', icon: 'none' })
+          })
           reject(new Error('登录已过期'))
           return
         }

@@ -228,33 +228,42 @@ function HomePage() {
     }
   }, []);
   var refreshUnreadMessageBadge = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_8__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().m(function _callee() {
-    var resp, _resp$data$total, _resp$data, total, _t;
+    var accessToken, resp, _resp$data$total, _resp$data, total, _t;
     return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().w(function (_context) {
       while (1) switch (_context.p = _context.n) {
         case 0:
-          _context.p = 0;
-          _context.n = 1;
+          // 先检查是否有token，没有token就不调用接口
+          accessToken = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('logto_token');
+          if (accessToken) {
+            _context.n = 1;
+            break;
+          }
+          console.log('⏭️ 未登录，跳过刷新消息角标');
+          return _context.a(2);
+        case 1:
+          _context.p = 1;
+          _context.n = 2;
           return _utils_api__WEBPACK_IMPORTED_MODULE_3__["default"].getMessages({
             page: 1,
             pageSize: 1,
             isRead: 'false'
           });
-        case 1:
+        case 2:
           resp = _context.v;
           if ((resp === null || resp === void 0 ? void 0 : resp.code) === 0) {
             total = (_resp$data$total = (_resp$data = resp.data) === null || _resp$data === void 0 ? void 0 : _resp$data.total) !== null && _resp$data$total !== void 0 ? _resp$data$total : 0;
             updateTabBarBadge(total);
           }
-          _context.n = 3;
+          _context.n = 4;
           break;
-        case 2:
-          _context.p = 2;
+        case 3:
+          _context.p = 3;
           _t = _context.v;
           console.warn('获取未读消息数量失败:', _t);
-        case 3:
+        case 4:
           return _context.a(2);
       }
-    }, _callee, null, [[0, 2]]);
+    }, _callee, null, [[1, 3]]);
   })), [updateTabBarBadge]);
 
   // 同步ref和state
@@ -267,10 +276,18 @@ function HomePage() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     listsByGroupRef.current = listsByGroup;
   }, [listsByGroup]);
+
+  // 只在首次加载时检查登录状态
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     loadUserInfo();
-    refreshUnreadMessageBadge();
-  }, [refreshUnreadMessageBadge]);
+  }, []);
+
+  // 登录完成后，刷新消息角标
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!loading) {
+      refreshUnreadMessageBadge();
+    }
+  }, [loading, refreshUnreadMessageBadge]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (!loading) {
       _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().nextTick(function () {
@@ -284,19 +301,26 @@ function HomePage() {
       });
     }
   }, [loading]);
+
+  // 页面显示时只刷新消息角标，不重新检查登录（避免重复调用）
   _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().useDidShow(function () {
     refreshUnreadMessageBadge();
-    loadUserInfo();
+    // 移除 loadUserInfo() 调用，避免重复登录检查
   });
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    // 确保登录完成（loading为false）后再初始化分组和设备列表
     if (!loading && !initGroupsCalledRef.current) {
-      initGroupsCalledRef.current = true;
-      initGroupsAndFirstPage();
+      // 再次确认有token
+      var accessToken = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('logto_token');
+      if (accessToken) {
+        initGroupsCalledRef.current = true;
+        initGroupsAndFirstPage();
+      }
     }
   }, [loading]);
   var loadUserInfo = /*#__PURE__*/function () {
     var _ref2 = (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_8__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().m(function _callee2() {
-      var accessToken, loginTimestamp, expiresIn, now, tokenAge, maxAge, cachedUser, meResp, data, _t2, _t3;
+      var accessToken, loginTimestamp, expiresIn, result, now, tokenAge, maxAge, _result, finalToken, cachedUser, finalUser, meResp, data, _t2, _t3;
       return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_9__["default"])().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
@@ -305,24 +329,7 @@ function HomePage() {
             loginTimestamp = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('login_timestamp');
             expiresIn = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('token_expires_in');
             if (!(!accessToken || !loginTimestamp || !expiresIn)) {
-              _context2.n = 2;
-              break;
-            }
-            if (redirectingToLoginRef.current) {
-              _context2.n = 1;
-              break;
-            }
-            redirectingToLoginRef.current = true;
-            _context2.n = 1;
-            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.navigateToWebViewLoginSimple)();
-          case 1:
-            return _context2.a(2);
-          case 2:
-            now = Date.now();
-            tokenAge = now - loginTimestamp;
-            maxAge = expiresIn * 1000;
-            if (!(tokenAge > maxAge)) {
-              _context2.n = 4;
+              _context2.n = 5;
               break;
             }
             if (redirectingToLoginRef.current) {
@@ -330,55 +337,123 @@ function HomePage() {
               break;
             }
             redirectingToLoginRef.current = true;
-            _context2.n = 3;
-            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.navigateToWebViewLoginSimple)();
+            _context2.n = 1;
+            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.wechatSilentLogin)();
+          case 1:
+            result = _context2.v;
+            if (result.success) {
+              _context2.n = 2;
+              break;
+            }
+            _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
+              title: '登录失败，请重试',
+              icon: 'none'
+            });
+            setLoading(false);
+            return _context2.a(2);
+          case 2:
+            // 登录成功后，重置redirectingToLoginRef，继续后续流程
+            redirectingToLoginRef.current = false;
+            _context2.n = 4;
+            break;
           case 3:
             return _context2.a(2);
           case 4:
-            redirectingToLoginRef.current = false;
-            cachedUser = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('user_info');
-            if (cachedUser) setUserInfo(cachedUser);
-            setLoading(false);
-            if (cachedUser) {
+            _context2.n = 9;
+            break;
+          case 5:
+            now = Date.now();
+            tokenAge = now - loginTimestamp;
+            maxAge = expiresIn * 1000;
+            if (!(tokenAge > maxAge)) {
+              _context2.n = 9;
+              break;
+            }
+            if (redirectingToLoginRef.current) {
               _context2.n = 8;
               break;
             }
-            _context2.p = 5;
+            redirectingToLoginRef.current = true;
             _context2.n = 6;
+            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.wechatSilentLogin)();
+          case 6:
+            _result = _context2.v;
+            if (_result.success) {
+              _context2.n = 7;
+              break;
+            }
+            _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
+              title: '登录已过期，请重试',
+              icon: 'none'
+            });
+            setLoading(false);
+            return _context2.a(2);
+          case 7:
+            // 登录成功后，重置redirectingToLoginRef，继续后续流程
+            redirectingToLoginRef.current = false;
+            _context2.n = 9;
+            break;
+          case 8:
+            return _context2.a(2);
+          case 9:
+            // 确保有有效的token后再继续
+            finalToken = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('logto_token');
+            if (finalToken) {
+              _context2.n = 10;
+              break;
+            }
+            setLoading(false);
+            return _context2.a(2);
+          case 10:
+            redirectingToLoginRef.current = false;
+            cachedUser = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getStorageSync('user_info');
+            finalUser = cachedUser;
+            if (!cachedUser) {
+              _context2.n = 11;
+              break;
+            }
+            setUserInfo(cachedUser);
+            _context2.n = 14;
+            break;
+          case 11:
+            _context2.p = 11;
+            _context2.n = 12;
             return _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().request({
               url: "".concat(process.env.TARO_APP_BASE_API || '', "/api/me/data"),
               method: 'GET',
               header: (0,_utils_auth__WEBPACK_IMPORTED_MODULE_4__.getAuthHeaders)()
             });
-          case 6:
+          case 12:
             meResp = _context2.v;
             if (meResp.statusCode === 200 && meResp.data && meResp.data.code === 0) {
               data = meResp.data.data;
               if (data !== null && data !== void 0 && data.user) {
                 _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().setStorageSync('user_info', data.user);
                 setUserInfo(data.user);
+                finalUser = data.user;
               }
             }
-            _context2.n = 8;
+            _context2.n = 14;
             break;
-          case 7:
-            _context2.p = 7;
+          case 13:
+            _context2.p = 13;
             _t2 = _context2.v;
-          case 8:
-            _context2.n = 10;
+          case 14:
+            setLoading(false);
+            _context2.n = 16;
             break;
-          case 9:
-            _context2.p = 9;
+          case 15:
+            _context2.p = 15;
             _t3 = _context2.v;
             _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().atMessage({
               message: '登录信息获取失败',
               type: 'error'
             });
             setLoading(false);
-          case 10:
+          case 16:
             return _context2.a(2);
         }
-      }, _callee2, null, [[5, 7], [0, 9]]);
+      }, _callee2, null, [[11, 13], [0, 15]]);
     }));
     return function loadUserInfo() {
       return _ref2.apply(this, arguments);

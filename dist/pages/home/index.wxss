@@ -224,3 +224,82 @@
 .taro-tabbar__tabbar {
   padding-top: 12rpx;
 }
+
+.home-nickname-auth-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-nickname-auth-modal {
+  width: 600rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.home-nickname-auth-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 40rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.home-nickname-auth-modal-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.home-nickname-auth-modal-close {
+  font-size: 48rpx;
+  color: #999999;
+  line-height: 1;
+  padding: 0 8rpx;
+}
+
+.home-nickname-auth-modal-body {
+  padding: 40rpx;
+}
+
+.home-nickname-auth-modal-desc {
+  font-size: 30rpx;
+  color: #666666;
+  line-height: 1.6;
+}
+
+.home-nickname-auth-modal-actions {
+  display: flex;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.home-nickname-auth-btn-cancel,
+.home-nickname-auth-btn-confirm {
+  flex: 1;
+  height: 100rpx;
+  line-height: 100rpx;
+  text-align: center;
+  font-size: 32rpx;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.home-nickname-auth-btn-cancel {
+  color: #666666;
+  border-right: 1rpx solid #f0f0f0;
+}
+
+.home-nickname-auth-btn-confirm {
+  color: #1B9AEE;
+  font-weight: 500;
+}

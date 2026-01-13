@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Button, Input } from '@tarojs/components'
-import { AtButton, AtMessage, AtActivityIndicator } from 'taro-ui'
+import { AtMessage, AtActivityIndicator } from 'taro-ui'
 import Taro from '@tarojs/taro'
-import { clearLoginData, navigateToWebViewLoginSimple } from '../../utils/auth'
+import { clearLoginData, wechatSilentLogin } from '../../utils/auth'
 import api from '../../utils/api'
 import 'taro-ui/dist/style/index.scss'
 import './index.scss'
@@ -194,8 +194,11 @@ export default function ProfilePage() {
         Taro.showToast({ title: '密码修改成功，请重新登录', icon: 'success' })
         closePasswordModal()
         clearLoginData()
-        setTimeout(() => {
-          navigateToWebViewLoginSimple()
+        setTimeout(async () => {
+          const result = await wechatSilentLogin()
+          if (!result.success) {
+            Taro.showToast({ title: '请重新打开小程序登录', icon: 'none' })
+          }
         }, 800)
       } else {
         Taro.showToast({ title: resp?.message || '修改失败', icon: 'none' })
@@ -208,21 +211,6 @@ export default function ProfilePage() {
     }
   }
 
-  const handleLogout = () => {
-    Taro.showModal({
-      title: '确认退出',
-      content: '确定要退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          clearLoginData()
-          Taro.atMessage({ message: '已退出登录', type: 'info' })
-          setTimeout(() => {
-            navigateToWebViewLoginSimple()
-          }, 300)
-        }
-      }
-    })
-  }
 
   const formatPhone = (phone?: string) => {
     if (!phone) return '--'
@@ -292,15 +280,6 @@ export default function ProfilePage() {
         </View>
       </View>
 
-      <View className='profile-footer'>
-        <AtButton 
-          type='primary' 
-          onClick={handleLogout}
-          className='profile-logout-button'
-        >
-          退出登录
-        </AtButton>
-      </View>
       {editVisible && (
         <View className='profile-popup-mask' onClick={closeEditModal} catchMove={true}>
           <View className='profile-popup' onClick={(e) => e.stopPropagation()}>

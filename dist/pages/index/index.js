@@ -39,17 +39,9 @@ function IndexPage() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     checkLoginAndRedirect();
   }, []);
-
-  // 页面显示时检查（包括从 webview 返回的情况）
-  (0,_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__.useDidShow)(function () {
-    if (!hasChecked) return;
-
-    // 已经从 webview 返回，重新检查登录状态
-    checkLoginAndRedirect();
-  });
   var checkLoginAndRedirect = /*#__PURE__*/function () {
     var _ref = (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_5__["default"])(/*#__PURE__*/(0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_6__["default"])().m(function _callee() {
-      var loginResult, _t, _t2;
+      var loginResult, silentLoginResult, _silentLoginResult, _t, _t2;
       return (0,_Users_insentek_WorkSpace_insentek_web_eco_viz_mini_program_eco_viz_mini_node_modules_babel_runtime_helpers_esm_regenerator_js__WEBPACK_IMPORTED_MODULE_6__["default"])().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -67,44 +59,84 @@ function IndexPage() {
             _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().switchTab({
               url: '/pages/home/index',
               fail: function fail() {
-                // 如果 switchTab 失败，使用 reLaunch
                 _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().reLaunch({
                   url: '/pages/home/index'
                 });
               }
             });
-            _context.n = 4;
+            _context.n = 5;
             break;
           case 3:
+            // 未登录，尝试微信静默登录
+            console.log('🔄 尝试微信静默登录...');
             _context.n = 4;
-            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_2__.navigateToWebViewLoginSimple)();
+            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_2__.wechatSilentLogin)();
           case 4:
-            _context.n = 9;
-            break;
+            silentLoginResult = _context.v;
+            if (silentLoginResult.success) {
+              // 静默登录成功，跳转到首页
+              console.log('✅ 微信静默登录成功');
+              _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().switchTab({
+                url: '/pages/home/index',
+                fail: function fail() {
+                  _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().reLaunch({
+                    url: '/pages/home/index'
+                  });
+                }
+              });
+            } else {
+              // 静默登录失败，显示错误提示
+              console.error('❌ 微信静默登录失败:', silentLoginResult.error);
+              _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+                title: silentLoginResult.error || '登录失败，请重试',
+                icon: 'none',
+                duration: 3000
+              });
+            }
           case 5:
-            _context.p = 5;
+            _context.n = 10;
+            break;
+          case 6:
+            _context.p = 6;
             _t = _context.v;
             console.error('检查登录状态失败:', _t);
-            // 发生错误时，尝试登录
-            _context.p = 6;
-            _context.n = 7;
-            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_2__.navigateToWebViewLoginSimple)();
-          case 7:
-            _context.n = 9;
-            break;
+            // 发生错误时，尝试静默登录
+            _context.p = 7;
+            _context.n = 8;
+            return (0,_utils_auth__WEBPACK_IMPORTED_MODULE_2__.wechatSilentLogin)();
           case 8:
-            _context.p = 8;
+            _silentLoginResult = _context.v;
+            if (_silentLoginResult.success) {
+              _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().switchTab({
+                url: '/pages/home/index',
+                fail: function fail() {
+                  _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().reLaunch({
+                    url: '/pages/home/index'
+                  });
+                }
+              });
+            } else {
+              _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+                title: _silentLoginResult.error || '登录失败，请重试',
+                icon: 'none',
+                duration: 3000
+              });
+            }
+            _context.n = 10;
+            break;
+          case 9:
+            _context.p = 9;
             _t2 = _context.v;
-            console.error('跳转到登录页失败:', _t2);
+            console.error('登录失败:', _t2);
             _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
               title: '登录失败，请重试',
               icon: 'none',
               duration: 3000
             });
-          case 9:
+          case 10:
             return _context.a(2);
         }
-      }, _callee, null, [[6, 8], [1, 5]]);
+      }, _callee, null, [[7, 9], [1, 6]]);
     }));
     return function checkLoginAndRedirect() {
       return _ref.apply(this, arguments);

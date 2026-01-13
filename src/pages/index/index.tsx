@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
-import { checkLoginStatus, navigateToWebViewLoginSimple } from '../../utils/auth'
+import Taro from '@tarojs/taro'
+import { checkLoginStatus, wechatSilentLogin } from '../../utils/auth'
 
 export default function IndexPage() {
   const [hasChecked, setHasChecked] = useState(false)
@@ -10,14 +10,6 @@ export default function IndexPage() {
   useEffect(() => {
     checkLoginAndRedirect()
   }, [])
-
-  // 页面显示时检查（包括从 webview 返回的情况）
-  useDidShow(() => {
-    if (!hasChecked) return
-    
-    // 已经从 webview 返回，重新检查登录状态
-    checkLoginAndRedirect()
-  })
 
   const checkLoginAndRedirect = async () => {
     setHasChecked(true)
@@ -30,21 +22,54 @@ export default function IndexPage() {
         Taro.switchTab({ 
           url: '/pages/home/index',
           fail: () => {
-            // 如果 switchTab 失败，使用 reLaunch
             Taro.reLaunch({ url: '/pages/home/index' })
           }
         })
       } else {
-        // 未登录，自动跳转到 WebView 登录页
-        await navigateToWebViewLoginSimple()
+        // 未登录，尝试微信静默登录
+        console.log('🔄 尝试微信静默登录...')
+        const silentLoginResult = await wechatSilentLogin()
+        
+        if (silentLoginResult.success) {
+          // 静默登录成功，跳转到首页
+          console.log('✅ 微信静默登录成功')
+          Taro.switchTab({ 
+            url: '/pages/home/index',
+            fail: () => {
+              Taro.reLaunch({ url: '/pages/home/index' })
+            }
+          })
+        } else {
+          // 静默登录失败，显示错误提示
+          console.error('❌ 微信静默登录失败:', silentLoginResult.error)
+          Taro.showToast({ 
+            title: silentLoginResult.error || '登录失败，请重试', 
+            icon: 'none',
+            duration: 3000
+          })
+        }
       }
     } catch (error) {
       console.error('检查登录状态失败:', error)
-      // 发生错误时，尝试登录
+      // 发生错误时，尝试静默登录
       try {
-        await navigateToWebViewLoginSimple()
+        const silentLoginResult = await wechatSilentLogin()
+        if (silentLoginResult.success) {
+          Taro.switchTab({ 
+            url: '/pages/home/index',
+            fail: () => {
+              Taro.reLaunch({ url: '/pages/home/index' })
+            }
+          })
+        } else {
+          Taro.showToast({ 
+            title: silentLoginResult.error || '登录失败，请重试', 
+            icon: 'none',
+            duration: 3000
+          })
+        }
       } catch (loginError) {
-        console.error('跳转到登录页失败:', loginError)
+        console.error('登录失败:', loginError)
         Taro.showToast({ 
           title: '登录失败，请重试', 
           icon: 'none',

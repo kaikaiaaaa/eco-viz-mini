@@ -3,7 +3,6 @@ export default defineAppConfig({
     'pages/home/index',
     'pages/message/index',
     'pages/profile/index',
-    'pages/webview/index',
     'pages/device-detail/index',
     'pages/device-threshold-edit/index',
     'pages/index/index'

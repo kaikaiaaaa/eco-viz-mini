@@ -58,20 +58,6 @@
   word-break: break-all;
 }
 
-.profile-footer {
-  padding: 24rpx 0 0;
-}
-
-.profile-logout-button {
-  width: 100%;
-  background: linear-gradient(135deg, #1b9aee 0%, #37c0ff 100%) !important;
-  border: none;
-  border-radius: 999rpx !important;
-  color: #ffffff !important;
-  font-size: 30rpx !important;
-  height: 88rpx;
-  line-height: 88rpx !important;
-}
 
 .profile-action-card {
   background: #ffffff;
@@ -226,9 +212,39 @@
   padding: 16rpx 32rpx;
   border-radius: 999rpx;
   background: #eef1f8;
+  border: none;
+  display: inline-block;
 }
 
 .profile-popup-btn.primary {
   background: linear-gradient(135deg, #1b9aee 0%, #37c0ff 100%);
   color: #ffffff;
+}
+
+// 支持 Button 组件
+button.profile-popup-btn {
+  background: #eef1f8 !important;
+  color: #5b6580 !important;
+  font-size: 28rpx !important;
+  padding: 16rpx 32rpx !important;
+  border-radius: 999rpx !important;
+  border: none !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+}
+
+button.profile-popup-btn.primary {
+  background: linear-gradient(135deg, #1b9aee 0%, #37c0ff 100%) !important;
+  color: #ffffff !important;
+}
+
+button.profile-popup-btn::after {
+  border: none !important;
 }

@@ -4,7 +4,7 @@ import { View, Text, Image, Input, Picker } from '@tarojs/components'
 import { AtTabs, AtTabsPane, AtList, AtActivityIndicator, AtMessage } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import api from '../../utils/api'
-import { navigateToWebViewLoginSimple, getAuthHeaders } from '../../utils/auth'
+import { getAuthHeaders, wechatSilentLogin } from '../../utils/auth'
 import 'taro-ui/dist/style/index.scss'
 import './index.scss'
 
@@ -142,6 +142,13 @@ export default function HomePage() {
   }, [])
 
   const refreshUnreadMessageBadge = useCallback(async () => {
+    // 先检查是否有token，没有token就不调用接口
+    const accessToken = Taro.getStorageSync('logto_token')
+    if (!accessToken) {
+      console.log('⏭️ 未登录，跳过刷新消息角标')
+      return
+    }
+    
     try {
       const resp: any = await api.getMessages({ page: 1, pageSize: 1, isRead: 'false' })
       if (resp?.code === 0) {
@@ -166,10 +173,17 @@ export default function HomePage() {
     listsByGroupRef.current = listsByGroup
   }, [listsByGroup])
 
+  // 只在首次加载时检查登录状态
   useEffect(() => {
     loadUserInfo()
-    refreshUnreadMessageBadge()
-  }, [refreshUnreadMessageBadge])
+  }, [])
+  
+  // 登录完成后，刷新消息角标
+  useEffect(() => {
+    if (!loading) {
+      refreshUnreadMessageBadge()
+    }
+  }, [loading, refreshUnreadMessageBadge])
 
   useEffect(() => {
     if (!loading) {
@@ -188,15 +202,21 @@ export default function HomePage() {
     }
   }, [loading])
 
+  // 页面显示时只刷新消息角标，不重新检查登录（避免重复调用）
   Taro.useDidShow(() => {
     refreshUnreadMessageBadge()
-    loadUserInfo()
+    // 移除 loadUserInfo() 调用，避免重复登录检查
   })
   
   useEffect(() => {
+    // 确保登录完成（loading为false）后再初始化分组和设备列表
     if (!loading && !initGroupsCalledRef.current) {
-      initGroupsCalledRef.current = true
-      initGroupsAndFirstPage()
+      // 再次确认有token
+      const accessToken = Taro.getStorageSync('logto_token')
+      if (accessToken) {
+        initGroupsCalledRef.current = true
+        initGroupsAndFirstPage()
+      }
     }
   }, [loading])
 
@@ -208,25 +228,54 @@ export default function HomePage() {
       if (!accessToken || !loginTimestamp || !expiresIn) {
         if (!redirectingToLoginRef.current) {
           redirectingToLoginRef.current = true
-          await navigateToWebViewLoginSimple()
+          const result = await wechatSilentLogin()
+          if (!result.success) {
+            Taro.showToast({ title: '登录失败，请重试', icon: 'none' })
+            setLoading(false)
+            return
+          }
+          // 登录成功后，重置redirectingToLoginRef，继续后续流程
+          redirectingToLoginRef.current = false
+        } else {
+          // 正在登录中，等待登录完成
+          return
         }
+      } else {
+        const now = Date.now()
+        const tokenAge = now - loginTimestamp
+        const maxAge = expiresIn * 1000
+        if (tokenAge > maxAge) {
+          if (!redirectingToLoginRef.current) {
+            redirectingToLoginRef.current = true
+            const result = await wechatSilentLogin()
+            if (!result.success) {
+              Taro.showToast({ title: '登录已过期，请重试', icon: 'none' })
+              setLoading(false)
+              return
+            }
+            // 登录成功后，重置redirectingToLoginRef，继续后续流程
+            redirectingToLoginRef.current = false
+          } else {
+            // 正在登录中，等待登录完成
+            return
+          }
+        }
+      }
+      
+      // 确保有有效的token后再继续
+      const finalToken = Taro.getStorageSync('logto_token')
+      if (!finalToken) {
+        setLoading(false)
         return
       }
-      const now = Date.now()
-      const tokenAge = now - loginTimestamp
-      const maxAge = expiresIn * 1000
-      if (tokenAge > maxAge) {
-        if (!redirectingToLoginRef.current) {
-          redirectingToLoginRef.current = true
-          await navigateToWebViewLoginSimple()
-        }
-        return
-      }
+      
       redirectingToLoginRef.current = false
       const cachedUser = Taro.getStorageSync('user_info')
-      if (cachedUser) setUserInfo(cachedUser)
-      setLoading(false)
-      if (!cachedUser) {
+      let finalUser = cachedUser
+      
+      if (cachedUser) {
+        setUserInfo(cachedUser)
+      } else {
         try {
           const meResp = await Taro.request({
             url: `${process.env.TARO_APP_BASE_API || ''}/api/me/data`,
@@ -238,10 +287,13 @@ export default function HomePage() {
             if (data?.user) {
               Taro.setStorageSync('user_info', data.user)
               setUserInfo(data.user)
+              finalUser = data.user
             }
           }
         } catch (e) {}
       }
+      
+      setLoading(false)
     } catch (error) {
       Taro.atMessage({ message: '登录信息获取失败', type: 'error' })
       setLoading(false)
