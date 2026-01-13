@@ -205,8 +205,8 @@
 /******/ 				"webpack/container/remote/@tarojs/taro",
 /******/ 				"webpack/container/remote/react",
 /******/ 				"webpack/container/remote/taro-ui",
-/******/ 				"webpack/container/remote/react/jsx-runtime",
-/******/ 				"webpack/container/remote/dayjs"
+/******/ 				"webpack/container/remote/dayjs",
+/******/ 				"webpack/container/remote/react/jsx-runtime"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
@@ -245,14 +245,14 @@
 /******/ 				"./taro-ui",
 /******/ 				null
 /******/ 			],
-/******/ 			"webpack/container/remote/react/jsx-runtime": [
-/******/ 				"default",
-/******/ 				"./react/jsx-runtime",
-/******/ 				null
-/******/ 			],
 /******/ 			"webpack/container/remote/dayjs": [
 /******/ 				"default",
 /******/ 				"./dayjs",
+/******/ 				null
+/******/ 			],
+/******/ 			"webpack/container/remote/react/jsx-runtime": [
+/******/ 				"default",
+/******/ 				"./react/jsx-runtime",
 /******/ 				null
 /******/ 			]
 /******/ 		};

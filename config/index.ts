@@ -1,5 +1,9 @@
 import type { UserConfigExport } from '@tarojs/cli';
 import path from 'path';
+import * as dotenv from 'dotenv';
+
+// 加载 .env 文件
+dotenv.config();
 
 const config: UserConfigExport = {
   projectName: 'eco-viz-mini',
@@ -13,7 +17,9 @@ const config: UserConfigExport = {
   sourceRoot: 'src',
   outputRoot: 'dist',
   plugins: ['@tarojs/plugin-framework-react', '@tarojs/plugin-platform-weapp'],
-  defineConstants: {},
+  defineConstants: {
+    WECHAT_APP_ID: JSON.stringify(process.env.WECHAT_APP_ID || ''),
+  },
   copy: {
     patterns: [],
     options: {}

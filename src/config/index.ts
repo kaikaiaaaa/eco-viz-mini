@@ -14,8 +14,9 @@ export const config = {
   },
 
   // 微信小程序配置
+  // App ID 通过 Taro 的 defineConstants 在构建时注入
   weapp: {
-    appId: 'wxad0bc6972754b77c'
+    appId: WECHAT_APP_ID || ''
   }
 }
 
